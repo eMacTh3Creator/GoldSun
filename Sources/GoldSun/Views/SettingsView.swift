@@ -26,13 +26,13 @@ struct SettingsView: View {
                     Label("Updates", systemImage: "arrow.triangle.2.circlepath")
                 }
         }
-        .frame(width: 540, height: 460)
+        .frame(width: 560, height: 520)
         .scenePadding()
     }
 }
 
 private struct GeneralSettingsPane: View {
-    @AppStorage("homePage") private var homePage = "https://www.google.com"
+    @AppStorage("homePage") private var homePage = BrowserDestination.goldSunStartPage.absoluteString
     @AppStorage("searchEngine") private var searchEngine = SearchEngine.duckDuckGo.rawValue
     @AppStorage("preferredEngine") private var preferredEngine = BrowserEngineKind.chromiumCEF.rawValue
     @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
@@ -42,6 +42,10 @@ private struct GeneralSettingsPane: View {
         Form {
             Section("Startup") {
                 TextField("Home page", text: $homePage)
+
+                Button("Use GoldSun Start Page") {
+                    homePage = BrowserDestination.goldSunStartPage.absoluteString
+                }
             }
 
             Section("Search") {
@@ -122,9 +126,30 @@ private struct PrivacySettingsPane: View {
     @AppStorage("adBlockHidesPlaceholders") private var hidesPlaceholders = AdBlockConfiguration.defaults.hidesPlaceholders
     @AppStorage("adBlockAllowsAcceptableAds") private var allowsAcceptableAds = AdBlockConfiguration.defaults.allowsAcceptableAds
     @AppStorage("adBlockAutoUpdateLists") private var autoUpdateLists = AdBlockConfiguration.defaults.updatesFilterListsAutomatically
+    @AppStorage(BrowserSecurityPreferenceKey.httpsUpgradeMode) private var httpsUpgradeMode = BrowserSecurityConfiguration.defaults.httpsUpgradeMode.rawValue
+    @AppStorage(BrowserSecurityPreferenceKey.fraudulentWebsiteWarnings) private var fraudulentWebsiteWarnings = BrowserSecurityConfiguration.defaults.fraudulentWebsiteWarnings
+    @AppStorage(BrowserSecurityPreferenceKey.privateBrowsingByDefault) private var privateBrowsingByDefault = BrowserSecurityConfiguration.defaults.privateBrowsingByDefault
+    @AppStorage(BrowserSecurityPreferenceKey.javaScriptEnabled) private var javaScriptEnabled = BrowserSecurityConfiguration.defaults.javaScriptEnabled
+    @AppStorage(BrowserSecurityPreferenceKey.blocksAutomaticPopups) private var blocksAutomaticPopups = BrowserSecurityConfiguration.defaults.blocksAutomaticPopups
+    @AppStorage(BrowserSecurityPreferenceKey.stripsTrackingParameters) private var stripsTrackingParameters = BrowserSecurityConfiguration.defaults.stripsTrackingParameters
 
     var body: some View {
         Form {
+            Section("Security") {
+                Picker("HTTPS", selection: $httpsUpgradeMode) {
+                    ForEach(HTTPSUpgradeMode.allCases) { mode in
+                        Text(mode.displayName)
+                            .tag(mode.rawValue)
+                    }
+                }
+
+                Toggle("Warn about fraudulent websites", isOn: $fraudulentWebsiteWarnings)
+                Toggle("Use private browsing storage by default", isOn: $privateBrowsingByDefault)
+                Toggle("Enable JavaScript", isOn: $javaScriptEnabled)
+                Toggle("Block automatic pop-up windows", isOn: $blocksAutomaticPopups)
+                Toggle("Strip known tracking parameters", isOn: $stripsTrackingParameters)
+            }
+
             Section("Ad Blocking") {
                 Toggle("Enable built-in ad blocker", isOn: $adBlockEnabled)
 

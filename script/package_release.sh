@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.1.3}"
+VERSION="${1:-0.2.0}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
@@ -42,6 +42,10 @@ chmod +x "$APP_BINARY"
 
 if [[ -f "$APP_ICON" ]]; then
   cp -X "$APP_ICON" "$APP_RESOURCES/GoldSun.icns"
+fi
+
+if [[ -d "$ROOT_DIR/Resources/StartPage" ]]; then
+  ditto --noextattr --norsrc "$ROOT_DIR/Resources/StartPage" "$APP_RESOURCES/StartPage"
 fi
 
 cat >"$INFO_PLIST" <<PLIST

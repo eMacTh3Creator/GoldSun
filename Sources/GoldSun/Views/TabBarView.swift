@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @ObservedObject var model: BrowserModel
+    private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -31,7 +32,15 @@ struct TabBarView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
         }
-        .background(.bar)
+        .background {
+            Rectangle()
+                .fill(.bar)
+                .overlay(alignment: .bottom) {
+                    Rectangle()
+                        .fill(gold.opacity(0.16))
+                        .frame(height: 1)
+                }
+        }
     }
 }
 
@@ -40,14 +49,15 @@ private struct TabBarItemView: View {
     let isSelected: Bool
     let select: () -> Void
     let close: () -> Void
+    private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
 
     var body: some View {
         HStack(spacing: 6) {
             Button(action: select) {
                 HStack(spacing: 6) {
-                    Image(systemName: tab.isLoading ? "circle.dotted" : "globe")
+                    Image(systemName: tabIconName)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(isSelected ? gold : .secondary)
 
                     Text(tab.title.isEmpty ? "Untitled" : tab.title)
                         .lineLimit(1)
@@ -69,11 +79,23 @@ private struct TabBarItemView: View {
         .padding(.trailing, 5)
         .background {
             RoundedRectangle(cornerRadius: 7)
-                .fill(isSelected ? Color(nsColor: .controlBackgroundColor) : Color.clear)
+                .fill(isSelected ? gold.opacity(0.15) : Color.clear)
         }
         .overlay {
             RoundedRectangle(cornerRadius: 7)
-                .stroke(isSelected ? Color(nsColor: .separatorColor) : Color.clear)
+                .stroke(isSelected ? gold.opacity(0.45) : Color.clear)
         }
+    }
+
+    private var tabIconName: String {
+        if tab.isLoading {
+            return "circle.dotted"
+        }
+
+        if tab.url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
+            return "sun.max.fill"
+        }
+
+        return "globe"
     }
 }

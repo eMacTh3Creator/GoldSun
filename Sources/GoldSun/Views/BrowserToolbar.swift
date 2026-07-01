@@ -12,6 +12,8 @@ struct BrowserToolbar: View {
     @Environment(\.openWindow) private var openWindow
     @FocusState private var isAddressFocused: Bool
 
+    private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
+
     var body: some View {
         HStack(spacing: 8) {
             Button {
@@ -58,19 +60,30 @@ struct BrowserToolbar: View {
             }
             .help(model.selectedTab?.isLoading == true ? "Stop" : "Reload")
 
-            TextField("Search or enter website", text: $model.addressText)
-                .textFieldStyle(.plain)
-                .focused($isAddressFocused)
-                .onSubmit {
-                    model.loadAddress()
-                    isAddressFocused = false
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(nsColor: .controlBackgroundColor))
-                }
+            HStack(spacing: 7) {
+                Image(systemName: addressIconName)
+                    .font(.caption)
+                    .foregroundStyle(addressIconColor)
+                    .frame(width: 14)
+
+                TextField("Search or enter website", text: $model.addressText)
+                    .textFieldStyle(.plain)
+                    .focused($isAddressFocused)
+                    .onSubmit {
+                        model.loadAddress()
+                        isAddressFocused = false
+                    }
+            }
+            .padding(.horizontal, 11)
+            .padding(.vertical, 7)
+            .background {
+                RoundedRectangle(cornerRadius: 9)
+                    .fill(Color(nsColor: .controlBackgroundColor).opacity(0.92))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 9)
+                    .stroke(isAddressFocused ? gold.opacity(0.82) : Color(nsColor: .separatorColor).opacity(0.42), lineWidth: 1)
+            }
 
             Button {
                 model.openAddressInNewTab()
@@ -141,9 +154,21 @@ struct BrowserToolbar: View {
         }
         .buttonStyle(.borderless)
         .controlSize(.regular)
+        .tint(gold)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(.bar)
+        .background {
+            Rectangle()
+                .fill(.bar)
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [gold.opacity(0.34), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(height: 1)
+                }
+        }
     }
 
     private var displayMode: TabDisplayMode {
@@ -154,5 +179,29 @@ struct BrowserToolbar: View {
         let current = displayMode
         let next: TabDisplayMode = current.showsSidebar ? .topBar : .both
         tabDisplayMode = next.rawValue
+    }
+
+    private var addressIconName: String {
+        guard let url = model.selectedTab?.url else {
+            return "magnifyingglass"
+        }
+
+        if url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
+            return "sun.max.fill"
+        }
+
+        if url.scheme?.caseInsensitiveCompare("https") == .orderedSame {
+            return "lock.fill"
+        }
+
+        if url.scheme?.caseInsensitiveCompare("http") == .orderedSame {
+            return "exclamationmark.triangle.fill"
+        }
+
+        return "magnifyingglass"
+    }
+
+    private var addressIconColor: Color {
+        addressIconName == "exclamationmark.triangle.fill" ? .orange : gold
     }
 }

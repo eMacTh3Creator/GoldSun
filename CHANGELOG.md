@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- Added an offline GoldSun start page that is used at launch, for new tabs, and for Home until a custom home page is set.
+- Polished the native toolbar, address field, tab bar, sidebar tab rows, and bookmark bar with cleaner GoldSun-accented chrome.
+- Added security preferences for HTTPS-first navigation, strict HTTPS mode, fraudulent-website warnings, private browsing storage, JavaScript, pop-up blocking, and tracking parameter stripping.
+- Added app-owned HTTPS upgrades with localhost exemptions and automatic HTTP fallback in the default mode.
+- Added navigation cleanup for common tracking query parameters such as `utm_*`, `fbclid`, `gclid`, and `msclkid`.
+- Added a native WebKit content-rule blocker for common ad, tracker, malware, fingerprinting, and crypto-mining patterns in the development backend.
+- Bundled the GoldSun hero art into packaged apps for the internal start page.
+- Polished the GitHub Pages site around the speed-and-security product direction.
+
 ## 0.1.3
 
 - Added a native Downloads manager window with progress, open, reveal, cancel, retry, clear, and Downloads folder actions.

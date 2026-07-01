@@ -20,6 +20,12 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(url.absoluteString, "http://localhost:3000")
     }
 
+    func testPreservesGoldSunInternalStartPageURL() {
+        let url = AddressResolver.resolvedURL(from: BrowserDestination.goldSunStartPage.absoluteString)
+
+        XCTAssertEqual(url, BrowserDestination.goldSunStartPage)
+    }
+
     func testSearchesPlainLanguageInput() {
         let url = AddressResolver.resolvedURL(from: "swift browser architecture")
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -35,6 +41,17 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(defaults.protectionLevel, .balanced)
         XCTAssertTrue(defaults.enabledFilterLists.contains(.easyList))
         XCTAssertTrue(defaults.enabledFilterLists.contains(.easyPrivacy))
+    }
+
+    func testSecurityDefaultsPreferHTTPSAndWarnings() {
+        let defaults = BrowserSecurityConfiguration.defaults
+
+        XCTAssertEqual(defaults.httpsUpgradeMode, .automaticFallback)
+        XCTAssertTrue(defaults.fraudulentWebsiteWarnings)
+        XCTAssertTrue(defaults.javaScriptEnabled)
+        XCTAssertTrue(defaults.blocksAutomaticPopups)
+        XCTAssertTrue(defaults.stripsTrackingParameters)
+        XCTAssertFalse(defaults.privateBrowsingByDefault)
     }
 
     func testExtensionDefaultsTargetChromeWebStoreManifestV3() {

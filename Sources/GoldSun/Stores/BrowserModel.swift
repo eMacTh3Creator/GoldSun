@@ -11,8 +11,8 @@ final class BrowserModel: ObservableObject {
     private var tabCancellables: [BrowserTabSession.ID: Set<AnyCancellable>]
 
     init() {
-        let firstURL = AddressResolver.resolvedURL(from: "https://www.apple.com")
-        let firstTab = BrowserTabSession(title: "Apple", url: firstURL)
+        let firstURL = Self.resolvedHomePage()
+        let firstTab = BrowserTabSession(title: Self.title(for: firstURL), url: firstURL)
 
         tabs = [firstTab]
         selectedTabID = firstTab.id
@@ -34,7 +34,8 @@ final class BrowserModel: ObservableObject {
         }
     }
 
-    func newTab(address: String = "https://www.google.com") {
+    func newTab(address: String? = nil) {
+        let address = address ?? Self.resolvedHomePage().absoluteString
         let url = AddressResolver.resolvedURL(from: address)
         open(url, inNewTab: true)
     }
@@ -49,7 +50,7 @@ final class BrowserModel: ObservableObject {
     }
 
     func openAddress(_ address: String, inNewTab: Bool = false) {
-        let url = AddressResolver.resolvedURL(from: address)
+        let url = AddressResolver.resolvedURL(from: address, searchEngine: Self.searchEngine())
         open(url, inNewTab: inNewTab)
     }
 
@@ -58,12 +59,11 @@ final class BrowserModel: ObservableObject {
     }
 
     func goHome() {
-        let homePage = UserDefaults.standard.string(forKey: "homePage") ?? "https://www.google.com"
-        openAddress(homePage)
+        open(Self.resolvedHomePage())
     }
 
     private func createTab(url: URL) {
-        let tab = BrowserTabSession(url: url)
+        let tab = BrowserTabSession(title: Self.title(for: url), url: url)
 
         tabs.append(tab)
         observe(tab)
@@ -106,7 +106,7 @@ final class BrowserModel: ObservableObject {
             return
         }
 
-        let url = AddressResolver.resolvedURL(from: addressText)
+        let url = AddressResolver.resolvedURL(from: addressText, searchEngine: Self.searchEngine())
         selectedTab.load(url)
         addressText = url.absoluteString
     }
@@ -147,5 +147,23 @@ final class BrowserModel: ObservableObject {
             .store(in: &cancellables)
 
         tabCancellables[tab.id] = cancellables
+    }
+
+    private static func resolvedHomePage() -> URL {
+        guard let storedHomePage = UserDefaults.standard.string(forKey: "homePage"),
+              !storedHomePage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return BrowserDestination.goldSunStartPage
+        }
+
+        return AddressResolver.resolvedURL(from: storedHomePage, searchEngine: searchEngine())
+    }
+
+    private static func searchEngine() -> SearchEngine {
+        let rawValue = UserDefaults.standard.string(forKey: "searchEngine") ?? SearchEngine.duckDuckGo.rawValue
+        return SearchEngine(rawValue: rawValue) ?? .duckDuckGo
+    }
+
+    private static func title(for url: URL) -> String {
+        url == BrowserDestination.goldSunStartPage ? "GoldSun" : "New Tab"
     }
 }

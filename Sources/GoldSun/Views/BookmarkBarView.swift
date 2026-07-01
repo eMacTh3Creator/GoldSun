@@ -4,6 +4,7 @@ import SwiftUI
 struct BookmarkBarView: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
+    private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
 
     private var looseBookmarks: [BrowserBookmark] {
         bookmarkStore.bookmarkBarItems.filter { $0.folder == "Favorites" }
@@ -44,6 +45,14 @@ struct BookmarkBarView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
         }
-        .background(.bar)
+        .background {
+            Rectangle()
+                .fill(.bar)
+                .overlay(alignment: .bottom) {
+                    Rectangle()
+                        .fill(gold.opacity(0.12))
+                        .frame(height: 1)
+                }
+        }
     }
 }
