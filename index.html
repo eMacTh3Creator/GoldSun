@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="GoldSun is a native macOS Swift browser shell with a Chromium backend roadmap, Chrome Web Store compatibility, and built-in ad blocking.">
+    <meta name="description" content="GoldSun is a stripped-down macOS browser focused on fast launches, native polish, and security-first browsing defaults.">
     <title>GoldSun for macOS</title>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -14,7 +14,8 @@
         <span>GoldSun</span>
       </a>
       <nav aria-label="Primary">
-        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#speed">Speed</a>
         <a href="#release">Release</a>
         <a href="https://github.com/eMacTh3Creator/GoldSun">GitHub</a>
       </nav>
@@ -24,48 +25,60 @@
       <section class="hero">
         <div class="hero-copy">
           <h1>GoldSun</h1>
-          <p>A native macOS Swift browser built around a calm Mac interface, a Chromium backend roadmap, Chrome Web Store compatibility, and built-in ad blocking.</p>
+          <p>A stripped-down Mac browser built for speed, security, and a calmer native feel.</p>
           <div class="actions">
-            <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases/download/v0.1.3/GoldSun-0.1.3.pkg">Download</a>
+            <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases/download/v0.2.0/GoldSun-0.2.0.pkg">Download</a>
             <a class="button secondary" href="https://github.com/eMacTh3Creator/GoldSun">View Source</a>
           </div>
+          <div class="hero-points" aria-label="GoldSun priorities">
+            <span>Native Swift UI</span>
+            <span>HTTPS first</span>
+            <span>Built-in blocking</span>
+          </div>
         </div>
-        <img class="hero-image" src="assets/goldsun-hero.png" alt="GoldSun browser interface mockup">
       </section>
 
-      <section id="features" class="feature-band">
+      <section id="security" class="intro">
+        <h2>Security without browser bloat.</h2>
+        <p>GoldSun keeps the surface area small while tightening the defaults that matter most in daily browsing.</p>
+      </section>
+
+      <section class="feature-band">
         <div class="feature">
-          <h2>Mac-native shell</h2>
-          <p>SwiftUI and AppKit own the windows, toolbar, settings, menus, home button, side tabs, and optional top tab bar.</p>
+          <h2>HTTPS first</h2>
+          <p>HTTP navigations upgrade to HTTPS by default, with an optional strict mode for sites that should never fall back.</p>
         </div>
         <div class="feature">
-          <h2>Bookmarks built in</h2>
-          <p>GoldSun includes a native bookmark manager, searchable bookmark editing, folders, a bookmark bar, and sidebar shortcuts.</p>
+          <h2>Tracker cleanup</h2>
+          <p>Known tracking query parameters are removed before navigation, including common ad click and campaign identifiers.</p>
         </div>
         <div class="feature">
-          <h2>Auto updater</h2>
-          <p>GoldSun checks GitHub releases, downloads installer packages, and can start the macOS install flow when a new version appears.</p>
+          <h2>Native content blocking</h2>
+          <p>The WebKit development backend installs a compact rule list for common ads, trackers, and strict-mode noise.</p>
         </div>
         <div class="feature">
-          <h2>Downloads</h2>
-          <p>A native downloads window tracks progress, saving links, opening files, revealing downloads, cancelling work, and retrying failed transfers.</p>
+          <h2>Private storage option</h2>
+          <p>New tabs can use a nonpersistent website data store by default for lower-residue browsing sessions.</p>
+        </div>
+      </section>
+
+      <section id="speed" class="split">
+        <div class="feature">
+          <h2>Fast by design</h2>
+          <p>GoldSun opens to an offline start page, keeps the UI native, and avoids heavy dependencies in the shell. The result is a browser that feels immediate before the Chromium backend work even lands.</p>
         </div>
         <div class="feature">
-          <h2>Extension-ready</h2>
-          <p>The Chromium plan targets Chrome Web Store installs, Manifest V3, service workers, content scripts, and native permission review.</p>
-        </div>
-        <div class="feature">
-          <h2>Built-in blocking</h2>
-          <p>GoldSun includes native ad-block settings for protection level, tracker blocking, filter lists, acceptable ads, and automatic updates.</p>
+          <h2>Polished where it counts</h2>
+          <p>Version 0.2.0 adds the GoldSun start page, cleaner toolbar chrome, warmer tab selection, home defaults, downloads, bookmarks, auto update checks, and tighter security settings.</p>
         </div>
       </section>
 
       <section id="release" class="release">
         <div>
-          <h2>Version 0.1.3</h2>
-          <p>The prerelease package installs GoldSun into Applications with a Dock/Finder icon, native bookmarks, home navigation, tab bar options, downloads, and release-based update checks. It is unsigned until Developer ID signing and notarization are configured.</p>
+          <h2>Version 0.2.0</h2>
+          <p>The prerelease package installs GoldSun into Applications with a Dock/Finder icon, the new GoldSun start page, native bookmarks, tab bar options, downloads, auto update checks, and security-first defaults. It is unsigned until Developer ID signing and notarization are configured.</p>
         </div>
-        <pre><code>./script/package_release.sh 0.1.3</code></pre>
+        <pre><code>./script/package_release.sh 0.2.0</code></pre>
       </section>
     </main>
 
