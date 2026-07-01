@@ -34,6 +34,10 @@ if [[ -f "$APP_ICON" ]]; then
   cp -X "$APP_ICON" "$APP_RESOURCES/GoldSun.icns"
 fi
 
+if [[ -d "$ROOT_DIR/Resources/StartPage" ]]; then
+  ditto --noextattr --norsrc "$ROOT_DIR/Resources/StartPage" "$APP_RESOURCES/StartPage"
+fi
+
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
