@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @ObservedObject var model: BrowserModel
+    @ObservedObject var bookmarkStore: BookmarkStore
 
     private var selection: Binding<BrowserTabSession.ID?> {
         Binding {
@@ -22,6 +23,20 @@ struct SidebarView: View {
                                 model.close(tab: tab)
                             }
                         }
+                }
+            }
+
+            if !bookmarkStore.bookmarks.isEmpty {
+                Section("Bookmarks") {
+                    ForEach(bookmarkStore.bookmarks.prefix(8)) { bookmark in
+                        Button {
+                            model.open(bookmark.url)
+                        } label: {
+                            Label(bookmark.title, systemImage: "bookmark")
+                                .lineLimit(1)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }

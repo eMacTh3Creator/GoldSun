@@ -10,13 +10,13 @@ GoldSun's release pipeline produces four artifacts:
 ## Local release
 
 ```bash
-./script/package_release.sh 0.1.0
+./script/package_release.sh 0.1.1
 ```
 
 The package installer can be tested locally with:
 
 ```bash
-sudo installer -pkg release/0.1.0/GoldSun-0.1.0.pkg -target /
+sudo installer -pkg release/0.1.1/GoldSun-0.1.1.pkg -target /
 ```
 
 ## Official signing
@@ -26,7 +26,7 @@ Set Developer ID identities before packaging:
 ```bash
 export GOLDSUN_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
 export GOLDSUN_INSTALLER_SIGNING_IDENTITY="Developer ID Installer: Your Name (TEAMID)"
-./script/package_release.sh 0.1.0
+./script/package_release.sh 0.1.1
 ```
 
 Without those identities, the script creates ad-hoc signed local artifacts only.
@@ -46,8 +46,8 @@ export GOLDSUN_NOTARY_PROFILE=GoldSunNotaryProfile
 Create and push a version tag:
 
 ```bash
-git tag v0.1.0
-git push origin main v0.1.0
+git tag v0.1.1
+git push origin main v0.1.1
 ```
 
-The `Release` workflow packages artifacts and opens a draft GitHub release.
+The `Release` workflow tests the package, uploads artifacts, and publishes a prerelease GitHub release.

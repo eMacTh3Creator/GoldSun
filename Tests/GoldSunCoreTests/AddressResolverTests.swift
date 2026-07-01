@@ -45,4 +45,22 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(defaults.manifestSupportMode, .manifestV3)
         XCTAssertTrue(defaults.requiresInstallReview)
     }
+
+    func testTabDisplayModesExposeExpectedChrome() {
+        XCTAssertTrue(TabDisplayMode.sidebar.showsSidebar)
+        XCTAssertFalse(TabDisplayMode.sidebar.showsTabBar)
+        XCTAssertTrue(TabDisplayMode.topBar.showsTabBar)
+        XCTAssertFalse(TabDisplayMode.topBar.showsSidebar)
+        XCTAssertTrue(TabDisplayMode.both.showsSidebar)
+        XCTAssertTrue(TabDisplayMode.both.showsTabBar)
+    }
+
+    func testBookmarkStoresBarPreference() {
+        let url = URL(string: "https://example.com")!
+        let bookmark = BrowserBookmark(title: "Example", url: url, folder: "Favorites", showsInBar: true)
+
+        XCTAssertEqual(bookmark.url, url)
+        XCTAssertEqual(bookmark.folder, "Favorites")
+        XCTAssertTrue(bookmark.showsInBar)
+    }
 }

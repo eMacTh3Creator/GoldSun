@@ -38,6 +38,29 @@ final class BrowserModel: ObservableObject {
 
     func newTab(address: String = "https://www.google.com") {
         let url = AddressResolver.resolvedURL(from: address)
+        open(url, inNewTab: true)
+    }
+
+    func open(_ url: URL, inNewTab: Bool = false) {
+        if inNewTab || selectedTab == nil {
+            createTab(url: url)
+        } else {
+            selectedTab?.load(url)
+            addressText = url.absoluteString
+        }
+    }
+
+    func openAddress(_ address: String, inNewTab: Bool = false) {
+        let url = AddressResolver.resolvedURL(from: address)
+        open(url, inNewTab: inNewTab)
+    }
+
+    func goHome() {
+        let homePage = UserDefaults.standard.string(forKey: "homePage") ?? "https://www.google.com"
+        openAddress(homePage)
+    }
+
+    private func createTab(url: URL) {
         let tab = BrowserTabSession(url: url)
 
         tabs.append(tab)

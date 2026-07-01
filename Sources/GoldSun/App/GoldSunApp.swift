@@ -6,10 +6,12 @@ import SwiftUI
 struct GoldSunApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var browserModel = BrowserModel()
+    @StateObject private var bookmarkStore = BookmarkStore()
+    @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         WindowGroup("GoldSun", id: "browser") {
-            BrowserWindowView(model: browserModel)
+            BrowserWindowView(model: browserModel, bookmarkStore: bookmarkStore)
                 .frame(minWidth: 960, minHeight: 620)
         }
         .windowToolbarStyle(.unifiedCompact)
@@ -22,6 +24,13 @@ struct GoldSunApp: App {
             }
 
             CommandMenu("Navigation") {
+                Button("Home") {
+                    browserModel.goHome()
+                }
+                .keyboardShortcut("h", modifiers: [.command, .shift])
+
+                Divider()
+
                 Button("Back") {
                     browserModel.goBack()
                 }
@@ -54,6 +63,23 @@ struct GoldSunApp: App {
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }
+
+            CommandMenu("Bookmarks") {
+                Button("Add Bookmark") {
+                    bookmarkStore.addCurrentPage(from: browserModel.selectedTab)
+                }
+                .keyboardShortcut("d", modifiers: .command)
+
+                Button("Show Bookmarks") {
+                    openWindow(id: "bookmarks")
+                }
+                .keyboardShortcut("b", modifiers: [.command, .option])
+            }
+        }
+
+        Window("Bookmarks", id: "bookmarks") {
+            BookmarkManagerView(model: browserModel, bookmarkStore: bookmarkStore)
+                .frame(minWidth: 760, minHeight: 460)
         }
 
         Settings {
@@ -65,6 +91,11 @@ struct GoldSunApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
+
+        if let iconURL = Bundle.main.url(forResource: "GoldSun", withExtension: "icns"),
+           let image = NSImage(contentsOf: iconURL) {
+            NSApp.applicationIconImage = image
+        }
 
         DispatchQueue.main.async {
             NSApp.activate(ignoringOtherApps: true)

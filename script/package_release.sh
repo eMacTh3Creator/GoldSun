@@ -12,12 +12,14 @@ NOTARY_PROFILE="${GOLDSUN_NOTARY_PROFILE:-}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RELEASE_DIR="$ROOT_DIR/release/$VERSION"
-BUILD_DIR="$RELEASE_DIR/build"
+BUILD_DIR="${TMPDIR:-/tmp}/goldsun-release-$VERSION-build"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
+APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
+APP_ICON="$ROOT_DIR/Resources/GoldSun.icns"
 ENTITLEMENTS="$ROOT_DIR/Packaging/GoldSun.entitlements"
 PKG_ROOT="$BUILD_DIR/pkgroot"
 COMPONENT_PKG="$BUILD_DIR/$APP_NAME-component.pkg"
@@ -26,16 +28,21 @@ DMG_PATH="$RELEASE_DIR/$APP_NAME-$VERSION.dmg"
 ZIP_PATH="$RELEASE_DIR/$APP_NAME-$VERSION.app.zip"
 
 export MACOSX_DEPLOYMENT_TARGET="$MIN_SYSTEM_VERSION"
+export COPYFILE_DISABLE=1
 
 cd "$ROOT_DIR"
 
-rm -rf "$RELEASE_DIR"
-mkdir -p "$APP_MACOS" "$RELEASE_DIR"
+rm -rf "$RELEASE_DIR" "$BUILD_DIR"
+mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$RELEASE_DIR"
 
 swift build -c release --product "$APP_NAME"
 BUILD_BINARY="$(swift build -c release --show-bin-path)/$APP_NAME"
-cp "$BUILD_BINARY" "$APP_BINARY"
+cp -X "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
+
+if [[ -f "$APP_ICON" ]]; then
+  cp -X "$APP_ICON" "$APP_RESOURCES/GoldSun.icns"
+fi
 
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -48,6 +55,8 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$APP_NAME</string>
   <key>CFBundleIdentifier</key>
   <string>$BUNDLE_ID</string>
+  <key>CFBundleIconFile</key>
+  <string>GoldSun</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -70,6 +79,8 @@ cat >"$INFO_PLIST" <<PLIST
 </plist>
 PLIST
 
+xattr -cr "$APP_BUNDLE" 2>/dev/null || true
+
 if [[ "$SIGNING_IDENTITY" == "-" ]]; then
   codesign --force --options runtime --entitlements "$ENTITLEMENTS" --sign "$SIGNING_IDENTITY" "$APP_BUNDLE"
 else
@@ -78,7 +89,7 @@ fi
 codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
 
 mkdir -p "$PKG_ROOT/Applications"
-ditto "$APP_BUNDLE" "$PKG_ROOT/Applications/$APP_NAME.app"
+ditto --noextattr --norsrc "$APP_BUNDLE" "$PKG_ROOT/Applications/$APP_NAME.app"
 
 pkgbuild \
   --root "$PKG_ROOT" \

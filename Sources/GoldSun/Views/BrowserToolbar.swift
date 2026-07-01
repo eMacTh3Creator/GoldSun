@@ -3,20 +3,30 @@ import SwiftUI
 
 struct BrowserToolbar: View {
     @ObservedObject var model: BrowserModel
+    @ObservedObject var bookmarkStore: BookmarkStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
+    @AppStorage("showBookmarkBar") private var showBookmarkBar = true
+    @Environment(\.openWindow) private var openWindow
     @FocusState private var isAddressFocused: Bool
 
     var body: some View {
         HStack(spacing: 8) {
             Button {
-                model.isSidebarVisible.toggle()
+                toggleTabDisplayMode()
             } label: {
                 Image(systemName: "sidebar.left")
             }
-            .help("Show or hide sidebar")
+            .help("Toggle tab sidebar")
 
             Divider()
                 .frame(height: 18)
+
+            Button {
+                model.goHome()
+            } label: {
+                Image(systemName: "house")
+            }
+            .help("Home")
 
             Button {
                 model.goBack()
@@ -67,6 +77,27 @@ struct BrowserToolbar: View {
             .help("New tab")
 
             Button {
+                bookmarkStore.addCurrentPage(from: model.selectedTab)
+            } label: {
+                Image(systemName: "star")
+            }
+            .help("Add bookmark")
+
+            Button {
+                openWindow(id: "bookmarks")
+            } label: {
+                Image(systemName: "book")
+            }
+            .help("Bookmark manager")
+
+            Button {
+                showBookmarkBar.toggle()
+            } label: {
+                Image(systemName: showBookmarkBar ? "bookmark.fill" : "bookmark")
+            }
+            .help(showBookmarkBar ? "Hide bookmark bar" : "Show bookmark bar")
+
+            Button {
                 model.openChromeWebStore()
             } label: {
                 Image(systemName: "puzzlepiece")
@@ -85,5 +116,11 @@ struct BrowserToolbar: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(.bar)
+    }
+
+    private func toggleTabDisplayMode() {
+        let current = TabDisplayMode(rawValue: UserDefaults.standard.string(forKey: "tabDisplayMode") ?? "") ?? .both
+        let next: TabDisplayMode = current.showsSidebar ? .topBar : .both
+        UserDefaults.standard.set(next.rawValue, forKey: "tabDisplayMode")
     }
 }
