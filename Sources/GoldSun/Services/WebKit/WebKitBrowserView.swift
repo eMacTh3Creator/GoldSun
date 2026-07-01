@@ -3,9 +3,11 @@ import WebKit
 
 struct WebKitBrowserView: NSViewRepresentable {
     @ObservedObject var tab: BrowserTabSession
+    @ObservedObject var downloadStore: DownloadStore
+    let openURLInNewTab: (URL) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(tab: tab)
+        Coordinator(tab: tab, downloadStore: downloadStore, openURLInNewTab: openURLInNewTab)
     }
 
     func makeNSView(context: Context) -> WKWebView {
@@ -26,6 +28,8 @@ struct WebKitBrowserView: NSViewRepresentable {
 
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.tab = tab
+        context.coordinator.downloadStore = downloadStore
+        context.coordinator.openURLInNewTab = openURLInNewTab
 
         if context.coordinator.lastNavigationRequestID != tab.navigationRequest.id {
             context.coordinator.lastNavigationRequestID = tab.navigationRequest.id
@@ -46,12 +50,16 @@ struct WebKitBrowserView: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         weak var tab: BrowserTabSession?
+        weak var downloadStore: DownloadStore?
+        var openURLInNewTab: (URL) -> Void
         var lastNavigationRequestID: UUID?
 
         private var observations: [NSKeyValueObservation] = []
 
-        init(tab: BrowserTabSession) {
+        init(tab: BrowserTabSession, downloadStore: DownloadStore, openURLInNewTab: @escaping (URL) -> Void) {
             self.tab = tab
+            self.downloadStore = downloadStore
+            self.openURLInNewTab = openURLInNewTab
         }
 
         func attach(to webView: WKWebView) {
@@ -132,11 +140,26 @@ struct WebKitBrowserView: NSViewRepresentable {
             for navigationAction: WKNavigationAction,
             windowFeatures: WKWindowFeatures
         ) -> WKWebView? {
-            if navigationAction.targetFrame == nil {
-                webView.load(navigationAction.request)
+            if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
+                openURLInNewTab(url)
             }
 
             return nil
+        }
+
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationResponse: WKNavigationResponse,
+            decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void
+        ) {
+            guard !navigationResponse.canShowMIMEType,
+                  let url = navigationResponse.response.url else {
+                decisionHandler(.allow)
+                return
+            }
+
+            downloadStore?.download(url, suggestedFilename: navigationResponse.response.suggestedFilename)
+            decisionHandler(.cancel)
         }
 
         private func syncNavigationState(from webView: WKWebView) {

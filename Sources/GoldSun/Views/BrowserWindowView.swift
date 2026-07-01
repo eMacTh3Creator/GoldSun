@@ -5,6 +5,7 @@ struct BrowserWindowView: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var updateStore: SoftwareUpdateStore
+    @ObservedObject var downloadStore: DownloadStore
     @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
 
@@ -22,7 +23,12 @@ struct BrowserWindowView: View {
             }
 
             VStack(spacing: 0) {
-                BrowserToolbar(model: model, bookmarkStore: bookmarkStore, updateStore: updateStore)
+                BrowserToolbar(
+                    model: model,
+                    bookmarkStore: bookmarkStore,
+                    updateStore: updateStore,
+                    downloadStore: downloadStore
+                )
 
                 if displayMode.showsTabBar {
                     Divider()
@@ -37,7 +43,7 @@ struct BrowserWindowView: View {
                 Divider()
 
                 if let selectedTab = model.selectedTab {
-                    BrowserTabView(tab: selectedTab)
+                    BrowserTabView(tab: selectedTab, model: model, downloadStore: downloadStore)
                 } else {
                     EmptyBrowserView()
                 }

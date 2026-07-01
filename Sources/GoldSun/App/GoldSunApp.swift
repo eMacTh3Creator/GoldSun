@@ -8,11 +8,17 @@ struct GoldSunApp: App {
     @StateObject private var browserModel = BrowserModel()
     @StateObject private var bookmarkStore = BookmarkStore()
     @StateObject private var updateStore = SoftwareUpdateStore()
+    @StateObject private var downloadStore = DownloadStore()
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         WindowGroup("GoldSun", id: "browser") {
-            BrowserWindowView(model: browserModel, bookmarkStore: bookmarkStore, updateStore: updateStore)
+            BrowserWindowView(
+                model: browserModel,
+                bookmarkStore: bookmarkStore,
+                updateStore: updateStore,
+                downloadStore: downloadStore
+            )
                 .frame(minWidth: 960, minHeight: 620)
         }
         .windowToolbarStyle(.unifiedCompact)
@@ -86,10 +92,26 @@ struct GoldSunApp: App {
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
             }
+
+            CommandMenu("Downloads") {
+                Button("Show Downloads") {
+                    openWindow(id: "downloads")
+                }
+                .keyboardShortcut("j", modifiers: [.command, .option])
+
+                Button("Open Downloads Folder") {
+                    downloadStore.openDownloadsFolder()
+                }
+            }
         }
 
         Window("Bookmarks", id: "bookmarks") {
             BookmarkManagerView(model: browserModel, bookmarkStore: bookmarkStore)
+                .frame(minWidth: 760, minHeight: 460)
+        }
+
+        Window("Downloads", id: "downloads") {
+            DownloadManagerView(downloadStore: downloadStore)
                 .frame(minWidth: 760, minHeight: 460)
         }
 

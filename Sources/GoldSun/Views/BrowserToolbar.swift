@@ -5,19 +5,21 @@ struct BrowserToolbar: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var updateStore: SoftwareUpdateStore
+    @ObservedObject var downloadStore: DownloadStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
+    @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @Environment(\.openWindow) private var openWindow
     @FocusState private var isAddressFocused: Bool
 
     var body: some View {
         HStack(spacing: 8) {
             Button {
-                toggleTabDisplayMode()
+                cycleTabDisplayMode()
             } label: {
-                Image(systemName: "sidebar.left")
+                Image(systemName: displayMode.showsSidebar ? "sidebar.left" : "rectangle.topthird.inset.filled")
             }
-            .help("Toggle tab sidebar")
+            .help(displayMode.showsSidebar ? "Hide tab sidebar" : "Show tab sidebar")
 
             Divider()
                 .frame(height: 18)
@@ -71,6 +73,14 @@ struct BrowserToolbar: View {
                 }
 
             Button {
+                model.openAddressInNewTab()
+                isAddressFocused = false
+            } label: {
+                Image(systemName: "plus.square.on.square")
+            }
+            .help("Open address in new tab")
+
+            Button {
                 model.newTab()
             } label: {
                 Image(systemName: "plus")
@@ -90,6 +100,13 @@ struct BrowserToolbar: View {
                 Image(systemName: "book")
             }
             .help("Bookmark manager")
+
+            Button {
+                openWindow(id: "downloads")
+            } label: {
+                Image(systemName: "tray.and.arrow.down")
+            }
+            .help("Downloads")
 
             Button {
                 showBookmarkBar.toggle()
@@ -129,9 +146,13 @@ struct BrowserToolbar: View {
         .background(.bar)
     }
 
-    private func toggleTabDisplayMode() {
-        let current = TabDisplayMode(rawValue: UserDefaults.standard.string(forKey: "tabDisplayMode") ?? "") ?? .both
+    private var displayMode: TabDisplayMode {
+        TabDisplayMode(rawValue: tabDisplayMode) ?? .both
+    }
+
+    private func cycleTabDisplayMode() {
+        let current = displayMode
         let next: TabDisplayMode = current.showsSidebar ? .topBar : .both
-        UserDefaults.standard.set(next.rawValue, forKey: "tabDisplayMode")
+        tabDisplayMode = next.rawValue
     }
 }

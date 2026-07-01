@@ -8,6 +8,7 @@ GoldSun is a native macOS browser shell written in Swift. The product direction 
 - Core library target: `GoldSunCore`
 - Native SwiftUI window, sidebar, toolbar, settings scene, and menu commands
 - Home navigation, top tab bar mode, bookmark bar, and native bookmark manager
+- Downloads manager with link saving, progress, open, reveal, cancel, retry, and clear actions
 - AppKit bridge for an embedded development web view
 - Chrome Web Store / Manifest V3 compatibility planning and native settings
 - Built-in ad blocker preferences with filter-list options
@@ -44,10 +45,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.1.2](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.1.2).
+Download the current prerelease installer from [GoldSun v0.1.3](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.1.3).
 
 ```bash
-./script/package_release.sh 0.1.2
+./script/package_release.sh 0.1.3
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

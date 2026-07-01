@@ -7,7 +7,6 @@ final class BrowserModel: ObservableObject {
     @Published private(set) var tabs: [BrowserTabSession]
     @Published var selectedTabID: BrowserTabSession.ID?
     @Published var addressText: String
-    @Published var isSidebarVisible: Bool
 
     private var tabCancellables: [BrowserTabSession.ID: Set<AnyCancellable>]
 
@@ -18,7 +17,6 @@ final class BrowserModel: ObservableObject {
         tabs = [firstTab]
         selectedTabID = firstTab.id
         addressText = firstURL.absoluteString
-        isSidebarVisible = true
         tabCancellables = [:]
 
         observe(firstTab)
@@ -53,6 +51,10 @@ final class BrowserModel: ObservableObject {
     func openAddress(_ address: String, inNewTab: Bool = false) {
         let url = AddressResolver.resolvedURL(from: address)
         open(url, inNewTab: inNewTab)
+    }
+
+    func openAddressInNewTab() {
+        openAddress(addressText, inNewTab: true)
     }
 
     func goHome() {
