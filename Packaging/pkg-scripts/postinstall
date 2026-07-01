@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+
+/usr/bin/xattr -dr com.apple.quarantine "/Applications/GoldSun.app" 2>/dev/null || true
+exit 0

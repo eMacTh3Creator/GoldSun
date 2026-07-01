@@ -1,0 +1,52 @@
+# GoldSun
+
+GoldSun is a native macOS browser shell written in Swift. The product direction is a Chromium-backed browser with a Mac-first feel: system windows, menus, keyboard shortcuts, native controls, and a Safari-like calm around the browsing surface.
+
+## Current scaffold
+
+- SwiftPM macOS app target: `GoldSun`
+- Core library target: `GoldSunCore`
+- Native SwiftUI window, sidebar, toolbar, settings scene, and menu commands
+- AppKit bridge for an embedded development web view
+- Chrome Web Store / Manifest V3 compatibility planning and native settings
+- Built-in ad blocker preferences with filter-list options
+- Release packaging for `.app`, `.pkg`, `.dmg`, and zipped app artifacts
+- GitHub Pages-ready static site in `site/`
+- URL/search normalization with tests
+- Codex Run action wired through `script/build_and_run.sh`
+
+The app is runnable today with a WebKit development shim. Chrome Web Store extensions and the production ad blocker are Chromium-backend features; their user-facing settings and adapter boundaries are scaffolded now so the next implementation step can vendor CEF or another Chromium embedding layer without rewriting the SwiftUI shell.
+
+## Run
+
+Requires Xcode or Command Line Tools with a Swift compiler and macOS SDK from the same Xcode release.
+
+```bash
+./script/build_and_run.sh
+```
+
+Useful modes:
+
+```bash
+./script/build_and_run.sh --verify
+./script/build_and_run.sh --logs
+./script/build_and_run.sh --telemetry
+```
+
+## Test
+
+```bash
+swift test
+```
+
+## Package
+
+```bash
+./script/package_release.sh 0.1.0
+```
+
+The `.pkg` artifact installs GoldSun into `/Applications`. See `docs/Release.md` for Developer ID signing and notarization.
+
+## Chromium path
+
+See `docs/ChromiumBackend.md` for the backend plan. The short version: use Chromium Embedded Framework as the first practical backend, wrap it in a small Objective-C++ boundary, expose only a Swift browser-engine facade to the UI, and handle signing/sandboxing as a first-class macOS packaging concern.

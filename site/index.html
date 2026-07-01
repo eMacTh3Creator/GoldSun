@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GoldSun is a native macOS Swift browser shell with a Chromium backend roadmap, Chrome Web Store compatibility, and built-in ad blocking.">
+    <title>GoldSun for macOS</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="GoldSun home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>GoldSun</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#release">Release</a>
+        <a href="https://github.com/eMacTh3Creator/GoldSun">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>GoldSun</h1>
+          <p>A native macOS Swift browser built around a calm Mac interface, a Chromium backend roadmap, Chrome Web Store compatibility, and built-in ad blocking.</p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases">Download</a>
+            <a class="button secondary" href="https://github.com/eMacTh3Creator/GoldSun">View Source</a>
+          </div>
+        </div>
+        <img class="hero-image" src="assets/goldsun-hero.png" alt="GoldSun browser interface mockup">
+      </section>
+
+      <section id="features" class="feature-band">
+        <div class="feature">
+          <h2>Mac-native shell</h2>
+          <p>SwiftUI and AppKit own the windows, toolbar, settings, menus, and tab structure.</p>
+        </div>
+        <div class="feature">
+          <h2>Extension-ready</h2>
+          <p>The Chromium plan targets Chrome Web Store installs, Manifest V3, service workers, content scripts, and native permission review.</p>
+        </div>
+        <div class="feature">
+          <h2>Built-in blocking</h2>
+          <p>GoldSun includes native ad-block settings for protection level, tracker blocking, filter lists, acceptable ads, and automatic updates.</p>
+        </div>
+      </section>
+
+      <section id="release" class="release">
+        <div>
+          <h2>Version 0.1.0</h2>
+          <p>The first release package is produced as a macOS app bundle, installer package, disk image, and zipped app artifact.</p>
+        </div>
+        <pre><code>./script/package_release.sh 0.1.0</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <span>GoldSun for macOS</span>
+      <span>Swift, AppKit, SwiftUI, Chromium roadmap</span>
+    </footer>
+  </body>
+</html>
