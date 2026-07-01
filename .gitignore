@@ -4,6 +4,7 @@
 DerivedData/
 dist/
 release/
+release-artifacts/
 *.xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xccheckout
