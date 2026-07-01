@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2
+
+- Added a native auto updater backed by GitHub Releases.
+- Added automatic launch checks, a manual Check for Updates command, and toolbar update status.
+- Added updater settings for prerelease updates, automatic installer downloads, and automatic installer launch.
+- Added an update sheet for release notes, installer download, installer launch, and release page access.
+
 ## 0.1.1
 
 - Added Home navigation in the toolbar and Navigation menu.

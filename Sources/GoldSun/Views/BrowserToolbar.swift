@@ -4,6 +4,7 @@ import SwiftUI
 struct BrowserToolbar: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
+    @ObservedObject var updateStore: SoftwareUpdateStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
     @Environment(\.openWindow) private var openWindow
@@ -110,6 +111,16 @@ struct BrowserToolbar: View {
                 Image(systemName: adBlockEnabled ? "checkmark.shield" : "shield.slash")
             }
             .help(adBlockEnabled ? "Ad blocker on" : "Ad blocker off")
+
+            Button {
+                Task {
+                    await updateStore.checkForUpdates(userInitiated: true)
+                }
+            } label: {
+                Image(systemName: updateStore.toolbarIconName)
+            }
+            .disabled(updateStore.isBusy)
+            .help(updateStore.statusMessage)
         }
         .buttonStyle(.borderless)
         .controlSize(.regular)

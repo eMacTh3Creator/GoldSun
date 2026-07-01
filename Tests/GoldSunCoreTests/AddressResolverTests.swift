@@ -63,4 +63,10 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(bookmark.folder, "Favorites")
         XCTAssertTrue(bookmark.showsInBar)
     }
+
+    func testAppVersionComparesMultiDigitVersions() {
+        XCTAssertGreaterThan(AppVersion("v0.1.10")!, AppVersion("0.1.2")!)
+        XCTAssertEqual(AppVersion("0.1")!, AppVersion("0.1.0")!)
+        XCTAssertLessThan(AppVersion("0.1.1")!, AppVersion("0.2.0")!)
+    }
 }

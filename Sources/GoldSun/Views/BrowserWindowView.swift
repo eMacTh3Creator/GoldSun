@@ -4,6 +4,7 @@ import SwiftUI
 struct BrowserWindowView: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
+    @ObservedObject var updateStore: SoftwareUpdateStore
     @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
 
@@ -21,7 +22,7 @@ struct BrowserWindowView: View {
             }
 
             VStack(spacing: 0) {
-                BrowserToolbar(model: model, bookmarkStore: bookmarkStore)
+                BrowserToolbar(model: model, bookmarkStore: bookmarkStore, updateStore: updateStore)
 
                 if displayMode.showsTabBar {
                     Divider()
@@ -41,6 +42,12 @@ struct BrowserWindowView: View {
                     EmptyBrowserView()
                 }
             }
+        }
+        .task {
+            updateStore.startAutomaticChecks()
+        }
+        .sheet(isPresented: $updateStore.isUpdateSheetPresented) {
+            SoftwareUpdateSheetView(updateStore: updateStore)
         }
     }
 }

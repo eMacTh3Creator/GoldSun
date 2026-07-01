@@ -7,11 +7,12 @@ struct GoldSunApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var browserModel = BrowserModel()
     @StateObject private var bookmarkStore = BookmarkStore()
+    @StateObject private var updateStore = SoftwareUpdateStore()
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         WindowGroup("GoldSun", id: "browser") {
-            BrowserWindowView(model: browserModel, bookmarkStore: bookmarkStore)
+            BrowserWindowView(model: browserModel, bookmarkStore: bookmarkStore, updateStore: updateStore)
                 .frame(minWidth: 960, minHeight: 620)
         }
         .windowToolbarStyle(.unifiedCompact)
@@ -21,6 +22,16 @@ struct GoldSunApp: App {
                     browserModel.newTab()
                 }
                 .keyboardShortcut("t", modifiers: .command)
+            }
+
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates...") {
+                    Task {
+                        await updateStore.checkForUpdates(userInitiated: true)
+                    }
+                }
+                .keyboardShortcut("u", modifiers: [.command, .shift])
+                .disabled(updateStore.isBusy)
             }
 
             CommandMenu("Navigation") {
@@ -83,7 +94,7 @@ struct GoldSunApp: App {
         }
 
         Settings {
-            SettingsView()
+            SettingsView(updateStore: updateStore)
         }
     }
 }

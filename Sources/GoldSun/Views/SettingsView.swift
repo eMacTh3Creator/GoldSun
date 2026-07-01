@@ -2,6 +2,8 @@ import GoldSunCore
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject var updateStore: SoftwareUpdateStore
+
     var body: some View {
         TabView {
             GeneralSettingsPane()
@@ -18,8 +20,13 @@ struct SettingsView: View {
                 .tabItem {
                     Label("Privacy", systemImage: "shield")
                 }
+
+            UpdatesSettingsPane(updateStore: updateStore)
+                .tabItem {
+                    Label("Updates", systemImage: "arrow.triangle.2.circlepath")
+                }
         }
-        .frame(width: 520, height: 430)
+        .frame(width: 540, height: 460)
         .scenePadding()
     }
 }
@@ -153,5 +160,46 @@ private struct PrivacySettingsPane: View {
         } set: { newValue in
             UserDefaults.standard.set(newValue, forKey: list.preferenceKey)
         }
+    }
+}
+
+private struct UpdatesSettingsPane: View {
+    @ObservedObject var updateStore: SoftwareUpdateStore
+    @AppStorage(SoftwareUpdatePreferenceKey.automaticallyChecks) private var automaticallyChecks = true
+    @AppStorage(SoftwareUpdatePreferenceKey.includesPrereleases) private var includesPrereleases = true
+    @AppStorage(SoftwareUpdatePreferenceKey.automaticallyDownloadsInstaller) private var automaticallyDownloadsInstaller = true
+    @AppStorage(SoftwareUpdatePreferenceKey.automaticallyStartsInstaller) private var automaticallyStartsInstaller = true
+
+    var body: some View {
+        Form {
+            Section("Software Update") {
+                Toggle("Check for updates automatically", isOn: $automaticallyChecks)
+                Toggle("Include prerelease updates", isOn: $includesPrereleases)
+                Toggle("Download installers automatically", isOn: $automaticallyDownloadsInstaller)
+                Toggle("Start installer automatically", isOn: $automaticallyStartsInstaller)
+                    .disabled(!automaticallyDownloadsInstaller)
+            }
+
+            Section("Status") {
+                LabeledContent("Current version", value: updateStore.currentVersionString)
+                LabeledContent("Status", value: updateStore.statusMessage)
+
+                HStack {
+                    Button("Check Now") {
+                        Task {
+                            await updateStore.checkForUpdates(userInitiated: true)
+                        }
+                    }
+                    .disabled(updateStore.isBusy)
+
+                    if updateStore.availableUpdate != nil {
+                        Button("Release Page") {
+                            updateStore.openReleasePage()
+                        }
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
     }
 }
