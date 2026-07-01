@@ -41,11 +41,13 @@ swift test
 
 ## Package
 
+Download the current prerelease installer from [GoldSun v0.1.0](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.1.0).
+
 ```bash
 ./script/package_release.sh 0.1.0
 ```
 
-The `.pkg` artifact installs GoldSun into `/Applications`. See `docs/Release.md` for Developer ID signing and notarization.
+The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
 
 ## Chromium path
 

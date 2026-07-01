@@ -50,8 +50,15 @@ jobs:
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
+          body: |
+            GoldSun 0.1.0 prerelease.
+
+            This build packages the first native macOS Swift browser shell, Chrome Web Store / Manifest V3 planning surfaces, and built-in ad blocker preferences.
+
+            These artifacts are unsigned and not notarized yet. macOS Gatekeeper may warn or block installation until Developer ID signing and notarization are configured.
           files: |
             release/${{ steps.version.outputs.value }}/GoldSun-${{ steps.version.outputs.value }}.pkg
             release/${{ steps.version.outputs.value }}/GoldSun-${{ steps.version.outputs.value }}.dmg
             release/${{ steps.version.outputs.value }}/GoldSun-${{ steps.version.outputs.value }}.app.zip
-          draft: true
+          draft: false
+          prerelease: true
