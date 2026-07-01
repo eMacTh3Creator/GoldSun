@@ -49,7 +49,7 @@ public enum AddressResolver {
         }
 
         if looksLikeHostOrPath(address) {
-            let scheme = address.localizedCaseInsensitiveHasPrefix("localhost") ? "http" : "https"
+            let scheme = hasCaseInsensitivePrefix(address, "localhost") ? "http" : "https"
             return URL(string: "\(scheme)://\(address)")!
         }
 
@@ -73,7 +73,7 @@ public enum AddressResolver {
             return false
         }
 
-        if address.localizedCaseInsensitiveHasPrefix("localhost") {
+        if hasCaseInsensitivePrefix(address, "localhost") {
             return true
         }
 
@@ -88,5 +88,9 @@ public enum AddressResolver {
         }
 
         return hostCandidate.contains(".")
+    }
+
+    private static func hasCaseInsensitivePrefix(_ address: String, _ prefix: String) -> Bool {
+        address.range(of: prefix, options: [.anchored, .caseInsensitive]) != nil
     }
 }
