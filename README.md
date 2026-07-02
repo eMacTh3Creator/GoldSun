@@ -50,10 +50,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.1](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.1).
+Download the current prerelease installer from [GoldSun v0.2.2](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.2).
 
 ```bash
-./script/package_release.sh 0.2.1
+./script/package_release.sh 0.2.2
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

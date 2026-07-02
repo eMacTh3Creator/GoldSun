@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- Restored the GoldSun mountain sunrise treatment on the built-in start page using self-contained CSS art.
+- Added the two-tone GoldSun wordmark styling to the browser start page.
+- Refreshed the GitHub Pages hero image from the real GoldSun app window with the updated start page.
+- Removed the unused Chrome-like bundled start-page mock image from packaged app resources.
+
 ## 0.2.1
 
 - Made the toolbar's left new-tab button the single New Tab control and removed the duplicate plus button.

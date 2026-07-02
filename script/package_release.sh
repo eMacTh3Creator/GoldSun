@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.2.1}"
+VERSION="${1:-0.2.2}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
@@ -109,7 +109,7 @@ else
   productbuild --package "$COMPONENT_PKG" "$INSTALLER_PKG"
 fi
 
-ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
+ditto -c -k --keepParent --noextattr --norsrc "$APP_BUNDLE" "$ZIP_PATH"
 hdiutil create -volname "$APP_NAME $VERSION" -srcfolder "$APP_BUNDLE" -ov -format UDZO "$DMG_PATH"
 
 if [[ "$NOTARIZE" == "1" ]]; then

@@ -10,8 +10,6 @@ enum GoldSunStartPage {
     }
 
     static func html() -> String {
-        let backgroundImage = heroImageURL().map { "url('\($0.absoluteString)')" } ?? "none"
-
         return """
         <!doctype html>
         <html lang="en">
@@ -28,6 +26,9 @@ enum GoldSunStartPage {
                 --muted: rgba(255, 247, 230, 0.72);
                 --line: rgba(255, 216, 139, 0.26);
                 --field: rgba(25, 25, 25, 0.64);
+                --ridge-near: #151512;
+                --ridge-mid: #252016;
+                --ridge-far: #4c3b24;
               }
 
               * { box-sizing: border-box; }
@@ -41,15 +42,97 @@ enum GoldSunStartPage {
                 color: var(--text);
                 font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
                 letter-spacing: 0;
+                overflow-x: hidden;
+                background: #111315;
+              }
+
+              .scene {
+                position: fixed;
+                inset: 0;
+                overflow: hidden;
+                pointer-events: none;
                 background:
-                  linear-gradient(135deg, rgba(14, 15, 16, 0.86), rgba(18, 17, 15, 0.54) 44%, rgba(240, 162, 54, 0.32)),
-                  \(backgroundImage) center / cover fixed,
-                  radial-gradient(circle at 78% 70%, rgba(248, 177, 70, 0.92), transparent 34%),
-                  linear-gradient(135deg, #161819, #302216 58%, #f0a949);
+                  radial-gradient(circle at 76% 68%, rgba(255, 211, 123, 0.72) 0 7vmin, rgba(233, 141, 36, 0.28) 7.4vmin 22vmin, transparent 36vmin),
+                  radial-gradient(circle at 48% 12%, rgba(255, 238, 193, 0.12), transparent 46%),
+                  linear-gradient(135deg, #101315 0%, #181817 42%, #3c2c1b 68%, #e39a35 100%);
+              }
+
+              .scene::before,
+              .scene::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+              }
+
+              .scene::before {
+                background:
+                  linear-gradient(90deg, rgba(8, 9, 10, 0.82), transparent 34%, rgba(255, 186, 76, 0.18) 78%, rgba(255, 229, 162, 0.26)),
+                  linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%, rgba(12, 13, 14, 0.18));
+              }
+
+              .scene::after {
+                background: radial-gradient(ellipse at center, transparent 28%, rgba(5, 6, 7, 0.56) 100%);
+              }
+
+              .sunrise {
+                position: absolute;
+                right: clamp(48px, 10vw, 150px);
+                bottom: 18vh;
+                width: clamp(120px, 14vw, 220px);
+                aspect-ratio: 1;
+                border-radius: 50%;
+                background: radial-gradient(circle at 38% 35%, #fff0bd 0 12%, #ffd06e 38%, #f2a23a 68%, rgba(211, 112, 23, 0.2) 100%);
+                box-shadow: 0 0 70px rgba(255, 190, 87, 0.58), 0 0 180px rgba(239, 147, 44, 0.34);
+                opacity: 0.88;
+              }
+
+              .lake {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 26vh;
+                background:
+                  linear-gradient(180deg, rgba(59, 41, 24, 0.38), rgba(13, 14, 14, 0.9)),
+                  repeating-linear-gradient(176deg, rgba(255, 205, 109, 0.14) 0 1px, transparent 2px 18px);
+                opacity: 0.82;
+              }
+
+              .ridge {
+                position: absolute;
+                left: -8vw;
+                right: -8vw;
+                bottom: 0;
+                transform-origin: bottom;
+              }
+
+              .ridge.far {
+                bottom: 16vh;
+                height: 30vh;
+                background: linear-gradient(180deg, var(--ridge-far), #1d1a15);
+                clip-path: polygon(0 76%, 10% 58%, 18% 64%, 28% 42%, 38% 70%, 48% 52%, 58% 68%, 70% 38%, 82% 62%, 92% 50%, 100% 68%, 100% 100%, 0 100%);
+                filter: blur(0.5px);
+                opacity: 0.58;
+              }
+
+              .ridge.mid {
+                bottom: 8vh;
+                height: 34vh;
+                background: linear-gradient(180deg, #332817, var(--ridge-mid) 58%, #151513);
+                clip-path: polygon(0 72%, 8% 50%, 17% 66%, 26% 32%, 38% 72%, 49% 44%, 59% 66%, 70% 28%, 82% 64%, 91% 46%, 100% 72%, 100% 100%, 0 100%);
+                opacity: 0.86;
+              }
+
+              .ridge.near {
+                height: 27vh;
+                background: linear-gradient(180deg, #211a11, var(--ridge-near) 68%, #0d0e0d);
+                clip-path: polygon(0 64%, 9% 44%, 21% 72%, 31% 40%, 43% 78%, 55% 48%, 67% 72%, 79% 36%, 90% 66%, 100% 48%, 100% 100%, 0 100%);
               }
 
               main {
                 display: grid;
+                position: relative;
+                z-index: 1;
                 min-height: 100vh;
                 place-items: center;
                 padding: 7vh 28px;
@@ -91,7 +174,12 @@ enum GoldSunStartPage {
                 font-size: clamp(64px, 12vw, 128px);
                 line-height: 0.9;
                 font-weight: 760;
-                text-shadow: 0 16px 26px rgba(0, 0, 0, 0.38);
+                color: transparent;
+                background: linear-gradient(180deg, #fff9e8 0 46%, #f6c767 47%, #d68d20 76%, #8f5d14 100%);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.42));
               }
 
               p {
@@ -190,6 +278,15 @@ enum GoldSunStartPage {
               }
 
               @media (max-width: 620px) {
+                .sunrise {
+                  right: 8vw;
+                  bottom: 24vh;
+                }
+
+                .ridge.far {
+                  bottom: 18vh;
+                }
+
                 form {
                   flex-direction: column;
                 }
@@ -202,11 +299,18 @@ enum GoldSunStartPage {
             </style>
           </head>
           <body>
+            <div class="scene" aria-hidden="true">
+              <div class="sunrise"></div>
+              <div class="lake"></div>
+              <div class="ridge far"></div>
+              <div class="ridge mid"></div>
+              <div class="ridge near"></div>
+            </div>
             <main>
               <section class="panel" aria-label="GoldSun start page">
                 <div class="sun" aria-hidden="true"></div>
                 <h1>GoldSun</h1>
-                <p>A stripped down Mac browser built for fast launches, quiet chrome, and stricter privacy defaults.</p>
+                <p>A stripped down Mac browser built for fast launches, a quieter interface, and stricter privacy defaults.</p>
                 <form action="https://duckduckgo.com/" method="get">
                   <input name="q" type="search" autofocus autocomplete="off" spellcheck="false" placeholder="Search privately or enter a site">
                   <button type="submit">Search</button>
@@ -230,17 +334,4 @@ enum GoldSunStartPage {
         """
     }
 
-    private static func heroImageURL() -> URL? {
-        if let bundledURL = Bundle.main.url(
-            forResource: "goldsun-hero",
-            withExtension: "png",
-            subdirectory: "StartPage"
-        ) {
-            return bundledURL
-        }
-
-        let projectURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-            .appendingPathComponent("docs/assets/goldsun-hero.png")
-        return FileManager.default.fileExists(atPath: projectURL.path) ? projectURL : nil
-    }
 }
