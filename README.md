@@ -8,8 +8,8 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 
 - SwiftPM macOS app target: `GoldSun`
 - Core library target: `GoldSunCore`
-- Native SwiftUI window, sidebar, toolbar, settings scene, and menu commands
-- Home navigation, top tab bar mode, bookmark bar, and native bookmark manager
+- Native SwiftUI window, top tab bar, toolbar, settings scene, and menu commands
+- Home navigation, bookmark bar, and native bookmark manager page
 - Downloads manager with link saving, progress, open, reveal, cancel, retry, and clear actions
 - AppKit bridge for an embedded development web view
 - Chrome Web Store / Manifest V3 compatibility planning and native settings
@@ -50,10 +50,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.3](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.3).
+Download the current prerelease installer from [GoldSun v0.2.4](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.4).
 
 ```bash
-./script/package_release.sh 0.2.3
+./script/package_release.sh 0.2.4
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

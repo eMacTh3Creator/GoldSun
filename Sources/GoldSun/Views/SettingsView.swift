@@ -35,7 +35,6 @@ private struct GeneralSettingsPane: View {
     @AppStorage("homePage") private var homePage = BrowserDestination.goldSunStartPage.absoluteString
     @AppStorage("searchEngine") private var searchEngine = SearchEngine.duckDuckGo.rawValue
     @AppStorage("preferredEngine") private var preferredEngine = BrowserEngineKind.chromiumCEF.rawValue
-    @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
 
     var body: some View {
@@ -66,14 +65,7 @@ private struct GeneralSettingsPane: View {
                 }
             }
 
-            Section("Tabs and Bookmarks") {
-                Picker("Tabs", selection: $tabDisplayMode) {
-                    ForEach(TabDisplayMode.allCases) { mode in
-                        Text(mode.displayName)
-                            .tag(mode.rawValue)
-                    }
-                }
-
+            Section("Bookmarks") {
                 Toggle("Show bookmark bar", isOn: $showBookmarkBar)
             }
         }

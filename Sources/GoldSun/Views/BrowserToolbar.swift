@@ -7,7 +7,6 @@ struct BrowserToolbar: View {
     @ObservedObject var updateStore: SoftwareUpdateStore
     @ObservedObject var downloadStore: DownloadStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
-    @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @FocusState private var isAddressFocused: Bool
     @State private var isShowingDownloadsPopover = false
     @State private var isSavingDownloadLink = false
@@ -17,16 +16,6 @@ struct BrowserToolbar: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Button {
-                cycleTabDisplayMode()
-            } label: {
-                Image(systemName: displayMode.showsSidebar ? "sidebar.left" : "rectangle.topthird.inset.filled")
-            }
-            .help(displayMode.showsSidebar ? "Hide tab sidebar" : "Show tab sidebar")
-
-            Divider()
-                .frame(height: 18)
-
             Button {
                 model.goHome()
             } label: {
@@ -104,10 +93,6 @@ struct BrowserToolbar: View {
             .help(isCurrentPageBookmarked ? "This page is already bookmarked" : "Add bookmark")
 
             Button {
-                if !displayMode.showsSidebar {
-                    tabDisplayMode = TabDisplayMode.both.rawValue
-                }
-
                 model.openBookmarkManager()
             } label: {
                 Image(systemName: "book")
@@ -181,16 +166,6 @@ struct BrowserToolbar: View {
                 saveTypedDownloadLink()
             }
         }
-    }
-
-    private var displayMode: TabDisplayMode {
-        TabDisplayMode(rawValue: tabDisplayMode) ?? .both
-    }
-
-    private func cycleTabDisplayMode() {
-        let current = displayMode
-        let next: TabDisplayMode = current.showsSidebar ? .topBar : .both
-        tabDisplayMode = next.rawValue
     }
 
     private var addressIconName: String {

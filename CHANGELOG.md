@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4
+
+- Removed the browser sidebar and the sidebar/tab display preference path entirely; GoldSun now uses the top tab bar as its only tab chrome.
+- Kept bookmark and download management in built-in browser pages instead of sidebar-dependent surfaces.
+- Fixed the GoldSun start page Bookmarks and Downloads buttons so they open `goldsun://bookmarks` and `goldsun://downloads` in the current browser tab.
+
 ## 0.2.3
 
 - Updated software update installs to open the macOS installer and then quit GoldSun so the app can be replaced cleanly.

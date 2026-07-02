@@ -9,7 +9,7 @@ on:
       version:
         description: "Release version"
         required: true
-        default: "0.2.3"
+        default: "0.2.4"
 
 permissions:
   contents: write
@@ -53,7 +53,7 @@ jobs:
           body: |
             GoldSun ${{ steps.version.outputs.value }} prerelease.
 
-            This build packages the native macOS Swift browser shell, GoldSun offline start page, cleaner browser chrome, built-in bookmark and download pages, favicon-aware tabs and bookmarks, Chrome Web Store / Manifest V3 planning surfaces, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, tab bar options, download management, auto-update checks with installer handoff quitting, and the bundled app icon.
+            This build packages the native macOS Swift browser shell, GoldSun offline start page, cleaner browser chrome, built-in bookmark and download pages, favicon-aware tab bar and bookmarks, Chrome Web Store / Manifest V3 planning surfaces, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, download management, auto-update checks with installer handoff quitting, and the bundled app icon.
 
             These artifacts are unsigned and not notarized yet. macOS Gatekeeper may warn or block installation until Developer ID signing and notarization are configured.
           files: |

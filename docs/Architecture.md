@@ -19,7 +19,7 @@ GoldSun should feel like a native Mac browser before it feels like a port. The S
 ## First product surfaces
 
 - Main `WindowGroup` browser window
-- Native source-list sidebar for tabs
+- Native top tab bar for tab selection
 - Compact browser toolbar with navigation and address entry
 - Settings scene for homepage/search/engine, extension, and privacy preferences
 - Menu commands for common browser actions

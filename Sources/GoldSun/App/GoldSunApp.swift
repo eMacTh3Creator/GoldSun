@@ -10,7 +10,6 @@ struct GoldSunApp: App {
     @StateObject private var updateStore = SoftwareUpdateStore()
     @StateObject private var downloadStore = DownloadStore()
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
-    @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
 
     var body: some Scene {
@@ -95,10 +94,6 @@ struct GoldSunApp: App {
                 .disabled(!canBookmarkCurrentPage)
 
                 Button("Show Bookmarks") {
-                    if !(TabDisplayMode(rawValue: tabDisplayMode) ?? .both).showsSidebar {
-                        tabDisplayMode = TabDisplayMode.both.rawValue
-                    }
-
                     browserModel.openBookmarkManager()
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
@@ -123,20 +118,6 @@ struct GoldSunApp: App {
             }
 
             CommandMenu("Browser View") {
-                Button("Tabs in Sidebar") {
-                    tabDisplayMode = TabDisplayMode.sidebar.rawValue
-                }
-
-                Button("Tabs in Tab Bar") {
-                    tabDisplayMode = TabDisplayMode.topBar.rawValue
-                }
-
-                Button("Tabs in Sidebar and Tab Bar") {
-                    tabDisplayMode = TabDisplayMode.both.rawValue
-                }
-
-                Divider()
-
                 Toggle("Show Bookmark Bar", isOn: $showBookmarkBar)
             }
         }

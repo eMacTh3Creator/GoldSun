@@ -74,15 +74,6 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertTrue(defaults.requiresInstallReview)
     }
 
-    func testTabDisplayModesExposeExpectedChrome() {
-        XCTAssertTrue(TabDisplayMode.sidebar.showsSidebar)
-        XCTAssertFalse(TabDisplayMode.sidebar.showsTabBar)
-        XCTAssertTrue(TabDisplayMode.topBar.showsTabBar)
-        XCTAssertFalse(TabDisplayMode.topBar.showsSidebar)
-        XCTAssertTrue(TabDisplayMode.both.showsSidebar)
-        XCTAssertTrue(TabDisplayMode.both.showsTabBar)
-    }
-
     func testBookmarkStoresBarPreference() {
         let url = URL(string: "https://example.com")!
         let bookmark = BrowserBookmark(title: "Example", url: url, folder: "Favorites", showsInBar: true)
