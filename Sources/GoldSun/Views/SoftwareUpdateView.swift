@@ -91,11 +91,13 @@ struct SoftwareUpdateSheetView: View {
                     await updateStore.downloadAndStartInstaller()
                 }
             }
+            .help("Downloads the installer, opens it, then quits GoldSun so the update can install.")
             .keyboardShortcut(.defaultAction)
         case .downloaded:
-            Button("Open Installer") {
+            Button("Open Installer and Quit") {
                 updateStore.openInstaller()
             }
+            .help("Opens the installer package and quits GoldSun so the update can install.")
             .keyboardShortcut(.defaultAction)
         case .failed, .upToDate, .idle:
             Button("Check Again") {

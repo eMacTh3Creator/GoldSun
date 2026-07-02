@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+- Updated software update installs to open the macOS installer and then quit GoldSun so the app can be replaced cleanly.
+- Clarified updater controls around automatic installer launch and quit behavior.
+
 ## 0.2.2
 
 - Restored the GoldSun mountain sunrise treatment on the built-in start page using self-contained CSS art.

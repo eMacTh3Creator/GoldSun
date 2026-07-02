@@ -15,7 +15,7 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Chrome Web Store / Manifest V3 compatibility planning and native settings
 - Built-in ad blocker preferences with filter-list options
 - Bundled macOS app icon for Dock, Finder, and Applications
-- Auto updater that checks GitHub releases, downloads the installer, and starts the macOS install flow
+- Auto updater that checks GitHub releases, downloads the installer, starts the macOS install flow, and quits GoldSun before replacement
 - GoldSun offline start page used until a custom home page is set
 - HTTPS-first navigation, fraudulent-site warnings, pop-up blocking, tracking parameter stripping, and optional private browsing storage
 - Native WebKit content-rule blocking for common ads and trackers in the development backend
@@ -50,10 +50,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.2](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.2).
+Download the current prerelease installer from [GoldSun v0.2.3](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.3).
 
 ```bash
-./script/package_release.sh 0.2.2
+./script/package_release.sh 0.2.3
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

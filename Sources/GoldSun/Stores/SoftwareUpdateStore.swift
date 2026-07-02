@@ -172,7 +172,14 @@ final class SoftwareUpdateStore: ObservableObject {
             return
         }
 
-        NSWorkspace.shared.open(downloadedInstallerURL)
+        guard NSWorkspace.shared.open(downloadedInstallerURL) else {
+            state = .failed("GoldSun could not open the installer package.")
+            isUpdateSheetPresented = true
+            return
+        }
+
+        isUpdateSheetPresented = false
+        quitAfterInstallerHandoff()
     }
 
     func openReleasePage() {
@@ -205,6 +212,12 @@ final class SoftwareUpdateStore: ObservableObject {
         }
 
         return UserDefaults.standard.bool(forKey: key)
+    }
+
+    private func quitAfterInstallerHandoff() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+            NSApp.terminate(nil)
+        }
     }
 }
 

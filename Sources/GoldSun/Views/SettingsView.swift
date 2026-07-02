@@ -201,7 +201,7 @@ private struct UpdatesSettingsPane: View {
                 Toggle("Check for updates automatically", isOn: $automaticallyChecks)
                 Toggle("Include prerelease updates", isOn: $includesPrereleases)
                 Toggle("Download installers automatically", isOn: $automaticallyDownloadsInstaller)
-                Toggle("Start installer automatically", isOn: $automaticallyStartsInstaller)
+                Toggle("Start installer automatically and quit GoldSun", isOn: $automaticallyStartsInstaller)
                     .disabled(!automaticallyDownloadsInstaller)
             }
 
