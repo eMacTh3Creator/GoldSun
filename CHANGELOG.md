@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6
+
+- Removed the descriptive tagline from the built-in `goldsun://home` start page while leaving the browser and public site marketing copy intact.
+
 ## 0.2.5
 
 - Added browser-compatible bookmark import from Netscape HTML, Chrome-family JSON, Safari property lists, and GoldSun JSON backups.

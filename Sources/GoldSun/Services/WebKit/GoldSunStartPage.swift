@@ -182,14 +182,6 @@ enum GoldSunStartPage {
                 filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.42));
               }
 
-              p {
-                max-width: 650px;
-                margin: 22px auto 0;
-                color: var(--muted);
-                font-size: clamp(18px, 2.2vw, 23px);
-                line-height: 1.5;
-              }
-
               form {
                 display: flex;
                 gap: 10px;
@@ -310,7 +302,6 @@ enum GoldSunStartPage {
               <section class="panel" aria-label="GoldSun start page">
                 <div class="sun" aria-hidden="true"></div>
                 <h1>GoldSun</h1>
-                <p>A stripped down Mac browser built for fast launches, a quieter interface, and stricter privacy defaults.</p>
                 <form action="https://duckduckgo.com/" method="get">
                   <input name="q" type="search" autofocus autocomplete="off" spellcheck="false" placeholder="Search privately or enter a site">
                   <button type="submit">Search</button>
