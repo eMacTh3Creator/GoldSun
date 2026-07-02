@@ -23,6 +23,7 @@ let package = Package(
             path: "Sources/GoldSun",
             linkerSettings: [
                 .linkedFramework("AppKit"),
+                .linkedFramework("Security"),
                 .linkedFramework("WebKit")
             ]
         ),

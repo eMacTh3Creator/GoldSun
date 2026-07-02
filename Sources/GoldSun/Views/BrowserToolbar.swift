@@ -6,6 +6,7 @@ struct BrowserToolbar: View {
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var updateStore: SoftwareUpdateStore
     @ObservedObject var downloadStore: DownloadStore
+    @ObservedObject var passwordStore: PasswordStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
     @FocusState private var isAddressFocused: Bool
     @State private var isShowingDownloadsPopover = false
@@ -100,6 +101,13 @@ struct BrowserToolbar: View {
             .help("Open bookmark manager")
 
             Button {
+                model.openPasswordManager()
+            } label: {
+                Image(systemName: "key")
+            }
+            .help("Open password manager")
+
+            Button {
                 isShowingDownloadsPopover.toggle()
             } label: {
                 Image(systemName: "tray.and.arrow.down")
@@ -183,6 +191,10 @@ struct BrowserToolbar: View {
 
         if url == BrowserDestination.downloadManager {
             return "tray.and.arrow.down"
+        }
+
+        if url == BrowserDestination.passwordManager {
+            return "key.fill"
         }
 
         if url.scheme?.caseInsensitiveCompare("https") == .orderedSame {

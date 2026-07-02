@@ -5,15 +5,17 @@ import WebKit
 struct WebKitBrowserView: NSViewRepresentable {
     @ObservedObject var tab: BrowserTabSession
     @ObservedObject var downloadStore: DownloadStore
+    @ObservedObject var passwordStore: PasswordStore
     let openURLInNewTab: (URL) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(tab: tab, downloadStore: downloadStore, openURLInNewTab: openURLInNewTab)
+        Coordinator(tab: tab, downloadStore: downloadStore, passwordStore: passwordStore, openURLInNewTab: openURLInNewTab)
     }
 
     func makeNSView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configureSecurity(for: configuration)
+        configurePasswordManager(for: configuration, coordinator: context.coordinator)
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
@@ -31,6 +33,7 @@ struct WebKitBrowserView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.tab = tab
         context.coordinator.downloadStore = downloadStore
+        context.coordinator.passwordStore = passwordStore
         context.coordinator.openURLInNewTab = openURLInNewTab
 
         if context.coordinator.lastNavigationRequestID != tab.navigationRequest.id {
@@ -66,10 +69,100 @@ struct WebKitBrowserView: NSViewRepresentable {
         }
     }
 
+    private func configurePasswordManager(for configuration: WKWebViewConfiguration, coordinator: Coordinator) {
+        configuration.userContentController.add(
+            WeakScriptMessageHandler(delegate: coordinator),
+            name: Coordinator.passwordMessageHandlerName
+        )
+        configuration.userContentController.addUserScript(
+            WKUserScript(
+                source: Coordinator.passwordCaptureScript,
+                injectionTime: .atDocumentEnd,
+                forMainFrameOnly: true
+            )
+        )
+    }
+
     @MainActor
-    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+        static let passwordMessageHandlerName = "goldsunPasswords"
+        static let passwordCaptureScript = """
+        (function () {
+          if (window.__goldsunPasswordsInstalled) { return; }
+          window.__goldsunPasswordsInstalled = true;
+
+          function candidateUsernameInput(form, passwordInput) {
+            var inputs = Array.prototype.slice.call(form.querySelectorAll('input'));
+            var passwordIndex = inputs.indexOf(passwordInput);
+            var preferred = inputs.filter(function (input, index) {
+              if (index > passwordIndex) { return false; }
+              var type = (input.getAttribute('type') || 'text').toLowerCase();
+              var name = ((input.getAttribute('name') || '') + ' ' + (input.getAttribute('id') || '') + ' ' + (input.getAttribute('autocomplete') || '')).toLowerCase();
+              return ['email', 'text', 'search', 'tel', 'url'].indexOf(type) !== -1
+                && (name.indexOf('user') !== -1 || name.indexOf('email') !== -1 || name.indexOf('login') !== -1 || name.indexOf('account') !== -1);
+            });
+
+            if (preferred.length > 0) { return preferred[preferred.length - 1]; }
+
+            var fallback = inputs.filter(function (input, index) {
+              if (index > passwordIndex) { return false; }
+              var type = (input.getAttribute('type') || 'text').toLowerCase();
+              return ['email', 'text'].indexOf(type) !== -1;
+            });
+
+            return fallback.length > 0 ? fallback[fallback.length - 1] : null;
+          }
+
+          function dispatchInputEvents(input) {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          function passwordFormPayload(form) {
+            var passwordInput = form.querySelector('input[type="password"]');
+            if (!passwordInput || !passwordInput.value) { return null; }
+            var usernameInput = candidateUsernameInput(form, passwordInput);
+            return {
+              kind: 'submit',
+              origin: window.location.origin,
+              action: form.action || window.location.href,
+              title: document.title || window.location.hostname,
+              username: usernameInput ? usernameInput.value : '',
+              password: passwordInput.value
+            };
+          }
+
+          document.addEventListener('submit', function (event) {
+            var payload = passwordFormPayload(event.target);
+            if (payload && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.goldsunPasswords) {
+              window.webkit.messageHandlers.goldsunPasswords.postMessage(payload);
+            }
+          }, true);
+
+          window.__goldsunFillPassword = function (username, password) {
+            var forms = Array.prototype.slice.call(document.forms);
+            for (var i = 0; i < forms.length; i += 1) {
+              var passwordInput = forms[i].querySelector('input[type="password"]');
+              if (!passwordInput) { continue; }
+              var usernameInput = candidateUsernameInput(forms[i], passwordInput);
+              if (usernameInput && !usernameInput.value) {
+                usernameInput.value = username;
+                dispatchInputEvents(usernameInput);
+              }
+              if (!passwordInput.value) {
+                passwordInput.value = password;
+                dispatchInputEvents(passwordInput);
+              }
+              return true;
+            }
+            return false;
+          };
+        }());
+        """
+
         weak var tab: BrowserTabSession?
         weak var downloadStore: DownloadStore?
+        weak var passwordStore: PasswordStore?
         var openURLInNewTab: (URL) -> Void
         var lastNavigationRequestID: UUID?
 
@@ -77,9 +170,15 @@ struct WebKitBrowserView: NSViewRepresentable {
         private var upgradedHTTPFallbacks: [URL: URL] = [:]
         private var isShowingStartPage = false
 
-        init(tab: BrowserTabSession, downloadStore: DownloadStore, openURLInNewTab: @escaping (URL) -> Void) {
+        init(
+            tab: BrowserTabSession,
+            downloadStore: DownloadStore,
+            passwordStore: PasswordStore,
+            openURLInNewTab: @escaping (URL) -> Void
+        ) {
             self.tab = tab
             self.downloadStore = downloadStore
+            self.passwordStore = passwordStore
             self.openURLInNewTab = openURLInNewTab
         }
 
@@ -157,6 +256,7 @@ struct WebKitBrowserView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             syncNavigationState(from: webView)
+            autofillPassword(in: webView)
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -358,11 +458,62 @@ struct WebKitBrowserView: NSViewRepresentable {
                 "Bookmarks"
             case BrowserDestination.downloadManager:
                 "Downloads"
+            case BrowserDestination.passwordManager:
+                "Passwords"
             case BrowserDestination.goldSunStartPage:
                 "GoldSun"
             default:
                 "GoldSun"
             }
         }
+
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard message.name == Self.passwordMessageHandlerName,
+                  let payload = message.body as? [String: Any],
+                  payload["kind"] as? String == "submit",
+                  let originString = payload["origin"] as? String,
+                  let origin = URL(string: originString),
+                  let password = payload["password"] as? String else {
+                return
+            }
+
+            let username = payload["username"] as? String ?? ""
+            let title = payload["title"] as? String ?? origin.host(percentEncoded: false) ?? origin.absoluteString
+            passwordStore?.saveCaptured(origin: origin, username: username, password: password, title: title)
+        }
+
+        private func autofillPassword(in webView: WKWebView) {
+            guard let url = webView.url,
+                  !BrowserDestination.isInternal(url),
+                  let autofill = passwordStore?.autofillCredential(for: url) else {
+                return
+            }
+
+            let username = Self.javaScriptLiteral(autofill.credential.username)
+            let password = Self.javaScriptLiteral(autofill.password)
+            webView.evaluateJavaScript("window.__goldsunFillPassword && window.__goldsunFillPassword(\(username), \(password));")
+        }
+
+        private static func javaScriptLiteral(_ value: String) -> String {
+            guard let data = try? JSONSerialization.data(withJSONObject: [value]),
+                  let array = String(data: data, encoding: .utf8),
+                  array.count >= 2 else {
+                return "\"\""
+            }
+
+            return String(array.dropFirst().dropLast())
+        }
+    }
+}
+
+private final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var delegate: (any WKScriptMessageHandler)?
+
+    init(delegate: any WKScriptMessageHandler) {
+        self.delegate = delegate
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        delegate?.userContentController(userContentController, didReceive: message)
     }
 }

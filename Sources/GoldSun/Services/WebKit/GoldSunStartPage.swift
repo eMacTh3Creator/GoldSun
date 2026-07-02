@@ -317,6 +317,7 @@ enum GoldSunStartPage {
                 </form>
                 <div class="links">
                   <a class="link" href="goldsun://bookmarks">Bookmarks</a>
+                  <a class="link" href="goldsun://passwords">Passwords</a>
                   <a class="link" href="goldsun://downloads">Downloads</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun">Source</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun/releases">Releases</a>
@@ -325,6 +326,7 @@ enum GoldSunStartPage {
                 <div class="proof" aria-label="GoldSun priorities">
                   <span>HTTPS first</span>
                   <span>Tracker blocking</span>
+                  <span>Keychain passwords</span>
                   <span>No startup network call</span>
                 </div>
               </section>

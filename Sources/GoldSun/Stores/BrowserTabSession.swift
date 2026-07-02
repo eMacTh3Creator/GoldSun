@@ -35,7 +35,7 @@ final class BrowserTabSession: ObservableObject, Identifiable {
     func load(_ url: URL) {
         self.url = url
 
-        if url == BrowserDestination.bookmarkManager || url == BrowserDestination.downloadManager {
+        if BrowserDestination.isNativePage(url) {
             isLoading = false
             estimatedProgress = 1
             canGoBack = false

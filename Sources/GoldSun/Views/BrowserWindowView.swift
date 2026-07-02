@@ -6,6 +6,7 @@ struct BrowserWindowView: View {
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var updateStore: SoftwareUpdateStore
     @ObservedObject var downloadStore: DownloadStore
+    @ObservedObject var passwordStore: PasswordStore
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
 
     var body: some View {
@@ -14,7 +15,8 @@ struct BrowserWindowView: View {
                 model: model,
                 bookmarkStore: bookmarkStore,
                 updateStore: updateStore,
-                downloadStore: downloadStore
+                downloadStore: downloadStore,
+                passwordStore: passwordStore
             )
 
             Divider()
@@ -32,7 +34,8 @@ struct BrowserWindowView: View {
                     tab: selectedTab,
                     model: model,
                     bookmarkStore: bookmarkStore,
-                    downloadStore: downloadStore
+                    downloadStore: downloadStore,
+                    passwordStore: passwordStore
                 )
             } else {
                 EmptyBrowserView()

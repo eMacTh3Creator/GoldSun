@@ -10,7 +10,9 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Core library target: `GoldSunCore`
 - Native SwiftUI window, top tab bar, toolbar, settings scene, and menu commands
 - Home navigation, bookmark bar, and native bookmark manager page
+- Browser-compatible bookmark import/export for Safari, Chrome, Edge, Firefox, and GoldSun backups
 - Downloads manager with link saving, progress, open, reveal, cancel, retry, and clear actions
+- Keychain-backed password manager with browser CSV import/export, exact-origin autofill, and submitted-login capture
 - AppKit bridge for an embedded development web view
 - Chrome Web Store / Manifest V3 compatibility planning and native settings
 - Built-in ad blocker preferences with filter-list options
@@ -50,10 +52,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.4](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.4).
+Download the current prerelease installer from [GoldSun v0.2.5](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.5).
 
 ```bash
-./script/package_release.sh 0.2.4
+./script/package_release.sh 0.2.5
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

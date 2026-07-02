@@ -8,6 +8,7 @@ struct BookmarkManagerView: View {
     @State private var selectedBookmarkID: BrowserBookmark.ID?
     @State private var draft = BookmarkDraft()
     @State private var searchText = ""
+    @State private var statusMessage = ""
 
     private var filteredBookmarks: [BrowserBookmark] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -87,7 +88,35 @@ struct BookmarkManagerView: View {
             .disabled(draft.resolvedURL == nil)
             .help("Open bookmark")
 
+            Button {
+                importBookmarks()
+            } label: {
+                Image(systemName: "square.and.arrow.down")
+            }
+            .help("Import bookmarks from Safari, Chrome, Edge, Firefox, or GoldSun")
+
+            Menu {
+                Button("Browser HTML") {
+                    exportBookmarks(as: .browserHTML)
+                }
+
+                Button("GoldSun JSON") {
+                    exportBookmarks(as: .goldSunJSON)
+                }
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+            }
+            .menuStyle(.borderlessButton)
+            .help("Export bookmarks")
+
             Spacer()
+
+            if !statusMessage.isEmpty {
+                Text(statusMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
 
             Text("\(bookmarkStore.bookmarks.count) bookmarks")
                 .font(.caption)
@@ -156,6 +185,35 @@ struct BookmarkManagerView: View {
         }
 
         model.open(url)
+    }
+
+    private func importBookmarks() {
+        do {
+            guard let summary = try BrowserDataTransferPanel.importBookmarks(into: bookmarkStore) else {
+                return
+            }
+
+            statusMessage = "Imported \(summary.imported), skipped \(summary.skippedDuplicates)"
+
+            if selectedBookmarkID == nil {
+                selectedBookmarkID = bookmarkStore.bookmarks.first?.id
+                loadSelectedBookmark()
+            }
+        } catch {
+            statusMessage = error.localizedDescription
+            BrowserDataTransferPanel.present(error)
+        }
+    }
+
+    private func exportBookmarks(as format: BookmarkExportFormat) {
+        do {
+            if let url = try BrowserDataTransferPanel.exportBookmarks(from: bookmarkStore, format: format) {
+                statusMessage = "Exported \(url.lastPathComponent)"
+            }
+        } catch {
+            statusMessage = error.localizedDescription
+            BrowserDataTransferPanel.present(error)
+        }
     }
 }
 

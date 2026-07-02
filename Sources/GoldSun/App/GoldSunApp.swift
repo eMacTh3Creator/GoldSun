@@ -9,6 +9,7 @@ struct GoldSunApp: App {
     @StateObject private var bookmarkStore = BookmarkStore()
     @StateObject private var updateStore = SoftwareUpdateStore()
     @StateObject private var downloadStore = DownloadStore()
+    @StateObject private var passwordStore = PasswordStore()
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
 
@@ -18,7 +19,8 @@ struct GoldSunApp: App {
                 model: browserModel,
                 bookmarkStore: bookmarkStore,
                 updateStore: updateStore,
-                downloadStore: downloadStore
+                downloadStore: downloadStore,
+                passwordStore: passwordStore
             )
                 .frame(minWidth: 960, minHeight: 620)
         }
@@ -98,7 +100,51 @@ struct GoldSunApp: App {
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
 
+                Divider()
+
+                Button("Import Bookmarks...") {
+                    do {
+                        _ = try BrowserDataTransferPanel.importBookmarks(into: bookmarkStore)
+                    } catch {
+                        BrowserDataTransferPanel.present(error)
+                    }
+                }
+
+                Button("Export Bookmarks...") {
+                    do {
+                        _ = try BrowserDataTransferPanel.exportBookmarks(from: bookmarkStore, format: .browserHTML)
+                    } catch {
+                        BrowserDataTransferPanel.present(error)
+                    }
+                }
+
                 Toggle("Show Bookmark Bar", isOn: $showBookmarkBar)
+            }
+
+            CommandMenu("Passwords") {
+                Button("Show Passwords") {
+                    browserModel.openPasswordManager()
+                }
+                .keyboardShortcut("p", modifiers: [.command, .option])
+
+                Divider()
+
+                Button("Import Passwords...") {
+                    do {
+                        _ = try BrowserDataTransferPanel.importPasswords(into: passwordStore)
+                    } catch {
+                        BrowserDataTransferPanel.present(error)
+                    }
+                }
+
+                Button("Export Passwords...") {
+                    do {
+                        _ = try BrowserDataTransferPanel.exportPasswords(from: passwordStore)
+                    } catch {
+                        BrowserDataTransferPanel.present(error)
+                    }
+                }
+                .disabled(passwordStore.credentials.isEmpty)
             }
 
             CommandMenu("Downloads") {

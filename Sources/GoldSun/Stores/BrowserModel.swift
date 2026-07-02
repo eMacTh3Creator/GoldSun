@@ -83,6 +83,10 @@ final class BrowserModel: ObservableObject {
         open(BrowserDestination.downloadManager, inNewTab: inNewTab)
     }
 
+    func openPasswordManager(inNewTab: Bool = false) {
+        open(BrowserDestination.passwordManager, inNewTab: inNewTab)
+    }
+
     func closeSelectedTab() {
         guard let selectedTab else {
             return
@@ -180,6 +184,8 @@ final class BrowserModel: ObservableObject {
             "Bookmarks"
         case BrowserDestination.downloadManager:
             "Downloads"
+        case BrowserDestination.passwordManager:
+            "Passwords"
         default:
             "New Tab"
         }

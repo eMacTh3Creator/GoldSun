@@ -1,6 +1,12 @@
 import Foundation
 import GoldSunCore
 
+struct BookmarkImportSummary: Equatable {
+    let found: Int
+    let imported: Int
+    let skippedDuplicates: Int
+}
+
 @MainActor
 final class BookmarkStore: ObservableObject {
     @Published private(set) var bookmarks: [BrowserBookmark]
@@ -126,6 +132,51 @@ final class BookmarkStore: ObservableObject {
         let boundedDestination = max(0, min(adjustedDestination, bookmarks.count))
         bookmarks.insert(contentsOf: movingBookmarks, at: boundedDestination)
         save()
+    }
+
+    @discardableResult
+    func importBookmarks(from url: URL) throws -> BookmarkImportSummary {
+        let data = try Data(contentsOf: url)
+        let importedBookmarks = try BookmarkTransferService.importedBookmarks(from: data, filename: url.lastPathComponent)
+        let existingKeys = Set(bookmarks.map { normalizedURLKey($0.url) })
+        var seenKeys = existingKeys
+        var newBookmarks: [BrowserBookmark] = []
+
+        for bookmark in importedBookmarks {
+            let key = normalizedURLKey(bookmark.url)
+            guard !seenKeys.contains(key) else {
+                continue
+            }
+
+            seenKeys.insert(key)
+            newBookmarks.append(
+                BrowserBookmark(
+                    id: bookmark.id,
+                    title: normalizedTitle(bookmark.title, fallbackURL: bookmark.url),
+                    url: bookmark.url,
+                    folder: normalizedFolder(bookmark.folder),
+                    showsInBar: bookmark.showsInBar,
+                    createdAt: bookmark.createdAt,
+                    updatedAt: bookmark.updatedAt
+                )
+            )
+        }
+
+        if !newBookmarks.isEmpty {
+            bookmarks.append(contentsOf: newBookmarks)
+            save()
+        }
+
+        return BookmarkImportSummary(
+            found: importedBookmarks.count,
+            imported: newBookmarks.count,
+            skippedDuplicates: importedBookmarks.count - newBookmarks.count
+        )
+    }
+
+    func exportBookmarks(to url: URL, format: BookmarkExportFormat) throws {
+        let data = try BookmarkTransferService.exportedData(for: bookmarks, format: format)
+        try data.write(to: url, options: [.atomic])
     }
 
     private func load() {

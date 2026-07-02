@@ -35,6 +35,10 @@ final class AddressResolverTests: XCTestCase {
             AddressResolver.resolvedURL(from: BrowserDestination.downloadManager.absoluteString),
             BrowserDestination.downloadManager
         )
+        XCTAssertEqual(
+            AddressResolver.resolvedURL(from: BrowserDestination.passwordManager.absoluteString),
+            BrowserDestination.passwordManager
+        )
     }
 
     func testSearchesPlainLanguageInput() {

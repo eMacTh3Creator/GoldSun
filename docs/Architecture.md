@@ -21,8 +21,10 @@ GoldSun should feel like a native Mac browser before it feels like a port. The S
 - Main `WindowGroup` browser window
 - Native top tab bar for tab selection
 - Compact browser toolbar with navigation and address entry
-- Settings scene for homepage/search/engine, extension, and privacy preferences
+- Settings scene for homepage/search/engine, extension, privacy, password, and update preferences
 - Menu commands for common browser actions
+- Built-in pages for bookmarks, downloads, and Keychain-backed passwords
+- Browser data transfer adapters for bookmark HTML/JSON/plist and password CSV migration
 
 ## Extension and ad blocking surfaces
 

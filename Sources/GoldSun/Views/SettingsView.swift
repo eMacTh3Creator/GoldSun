@@ -21,12 +21,17 @@ struct SettingsView: View {
                     Label("Privacy", systemImage: "shield")
                 }
 
+            PasswordSettingsPane()
+                .tabItem {
+                    Label("Passwords", systemImage: "key")
+                }
+
             UpdatesSettingsPane(updateStore: updateStore)
                 .tabItem {
                     Label("Updates", systemImage: "arrow.triangle.2.circlepath")
                 }
         }
-        .frame(width: 560, height: 520)
+        .frame(width: 580, height: 540)
         .scenePadding()
     }
 }
@@ -215,6 +220,33 @@ private struct UpdatesSettingsPane: View {
                         }
                     }
                 }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+private struct PasswordSettingsPane: View {
+    @AppStorage(PasswordManagerPreferenceKey.isEnabled) private var isEnabled = PasswordManagerConfiguration.defaults.isEnabled
+    @AppStorage(PasswordManagerPreferenceKey.autofillEnabled) private var autofillEnabled = PasswordManagerConfiguration.defaults.autofillEnabled
+    @AppStorage(PasswordManagerPreferenceKey.savesSubmittedPasswords) private var savesSubmittedPasswords = PasswordManagerConfiguration.defaults.savesSubmittedPasswords
+
+    var body: some View {
+        Form {
+            Section("Password Manager") {
+                Toggle("Enable password manager", isOn: $isEnabled)
+
+                Toggle("Autofill saved passwords", isOn: $autofillEnabled)
+                    .disabled(!isEnabled)
+
+                Toggle("Save submitted passwords to Keychain", isOn: $savesSubmittedPasswords)
+                    .disabled(!isEnabled)
+            }
+
+            Section("Storage") {
+                Text("Passwords are stored in the macOS Keychain. GoldSun keeps only site, username, and title metadata in Application Support for the built-in manager page.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)

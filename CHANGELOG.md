@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.5
+
+- Added browser-compatible bookmark import from Netscape HTML, Chrome-family JSON, Safari property lists, and GoldSun JSON backups.
+- Added bookmark export to browser HTML for moving bookmarks to Safari, Chrome, Edge, Firefox, and other browsers, plus GoldSun JSON backup export.
+- Added a built-in password manager at `goldsun://passwords` with Keychain-backed storage, exact-origin autofill, submitted-login capture, manual editing, and browser CSV import/export.
+- Added Passwords toolbar, start-page, Settings, and menu bar entry points.
+
 ## 0.2.4
 
 - Removed the browser sidebar and the sidebar/tab display preference path entirely; GoldSun now uses the top tab bar as its only tab chrome.
