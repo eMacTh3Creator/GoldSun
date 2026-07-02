@@ -35,6 +35,13 @@ final class BrowserTabSession: ObservableObject, Identifiable {
     func load(_ url: URL) {
         self.url = url
         navigationRequest = BrowserNavigationRequest(url: url)
+
+        if BrowserDestination.isInternal(url) {
+            isLoading = false
+            estimatedProgress = 1
+            canGoBack = false
+            canGoForward = false
+        }
     }
 
     func request(_ action: BrowserAction) {

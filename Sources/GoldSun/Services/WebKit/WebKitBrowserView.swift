@@ -205,6 +205,13 @@ struct WebKitBrowserView: NSViewRepresentable {
                 return
             }
 
+            if BrowserDestination.isInternal(url) {
+                tab?.load(url)
+                tab?.title = Self.internalTitle(for: url)
+                decisionHandler(.cancel)
+                return
+            }
+
             isShowingStartPage = false
 
             if let strippedURL = trackingParameterStrippedURL(for: url) {
@@ -343,6 +350,19 @@ struct WebKitBrowserView: NSViewRepresentable {
                 || lowercasedHost == "127.0.0.1"
                 || lowercasedHost == "::1"
                 || lowercasedHost.hasSuffix(".local")
+        }
+
+        private static func internalTitle(for url: URL) -> String {
+            switch url {
+            case BrowserDestination.bookmarkManager:
+                "Bookmarks"
+            case BrowserDestination.downloadManager:
+                "Downloads"
+            case BrowserDestination.goldSunStartPage:
+                "GoldSun"
+            default:
+                "GoldSun"
+            }
         }
     }
 }

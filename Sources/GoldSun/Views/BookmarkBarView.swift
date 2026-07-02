@@ -21,8 +21,12 @@ struct BookmarkBarView: View {
                     Button {
                         model.open(bookmark.url)
                     } label: {
-                        Label(bookmark.title, systemImage: "bookmark")
-                            .lineLimit(1)
+                        HStack(spacing: 6) {
+                            FaviconView(url: bookmark.url, size: 14, fallbackSystemImage: "bookmark")
+
+                            Text(bookmark.title)
+                                .lineLimit(1)
+                        }
                     }
                     .buttonStyle(.borderless)
                     .help(bookmark.url.absoluteString)

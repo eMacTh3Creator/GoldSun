@@ -27,6 +27,17 @@ final class DownloadStore: NSObject, ObservableObject {
     private var tasksByDownloadID: [DownloadItem.ID: URLSessionDownloadTask] = [:]
     private var downloadIDsByTaskID: [Int: DownloadItem.ID] = [:]
 
+    var hasFinishedDownloads: Bool {
+        downloads.contains { item in
+            switch item.state {
+            case .completed, .failed, .cancelled:
+                true
+            case .queued, .downloading:
+                false
+            }
+        }
+    }
+
     func download(_ url: URL, suggestedFilename: String? = nil, destinationURL: URL? = nil) {
         let filename = sanitizedFilename(suggestedFilename ?? url.lastPathComponent, fallback: "GoldSun Download")
         let destinationURL = destinationURL ?? uniqueDownloadURL(for: filename)

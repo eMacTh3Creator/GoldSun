@@ -76,7 +76,8 @@ struct BookmarkManagerView: View {
             } label: {
                 Image(systemName: "plus")
             }
-            .help("Add current page")
+            .disabled(model.selectedTab.map { BrowserDestination.isInternal($0.url) } ?? true)
+            .help("Add current page to bookmarks")
 
             Button {
                 openDraft()
@@ -99,9 +100,10 @@ struct BookmarkManagerView: View {
     }
 
     private func createBookmarkFromCurrentPage() {
-        bookmarkStore.addCurrentPage(from: model.selectedTab)
-        selectedBookmarkID = bookmarkStore.bookmarks.last?.id
-        loadSelectedBookmark()
+        if let bookmark = bookmarkStore.addCurrentPage(from: model.selectedTab) {
+            selectedBookmarkID = bookmark.id
+            loadSelectedBookmark()
+        }
     }
 
     private func loadSelectedBookmark() {
@@ -119,7 +121,7 @@ struct BookmarkManagerView: View {
         }
 
         if let selectedBookmark {
-            bookmarkStore.update(
+            let bookmark = bookmarkStore.update(
                 BrowserBookmark(
                     id: selectedBookmark.id,
                     title: draft.title,
@@ -130,14 +132,15 @@ struct BookmarkManagerView: View {
                     updatedAt: selectedBookmark.updatedAt
                 )
             )
+            selectedBookmarkID = bookmark?.id
         } else {
-            bookmarkStore.add(
+            let bookmark = bookmarkStore.add(
                 title: draft.title,
                 url: url,
                 folder: draft.folder,
                 showsInBar: draft.showsInBar
             )
-            selectedBookmarkID = bookmarkStore.bookmarks.last?.id
+            selectedBookmarkID = bookmark.id
         }
     }
 
@@ -161,9 +164,7 @@ private struct BookmarkManagerRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: bookmark.showsInBar ? "bookmark.fill" : "bookmark")
-                .foregroundStyle(.secondary)
-                .frame(width: 16)
+            FaviconView(url: bookmark.url, fallbackSystemImage: bookmark.showsInBar ? "bookmark.fill" : "bookmark")
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(bookmark.title)
@@ -175,6 +176,7 @@ private struct BookmarkManagerRow: View {
                     .lineLimit(1)
             }
         }
+        .help(bookmark.url.absoluteString)
     }
 }
 
@@ -198,14 +200,17 @@ private struct BookmarkEditorView: View {
                 HStack {
                     Button("Open", action: open)
                         .disabled(draft.resolvedURL == nil)
+                        .help("Open this bookmark")
 
                     Spacer()
 
                     Button("Delete", role: .destructive, action: delete)
+                        .help("Delete this bookmark")
 
                     Button("Save", action: save)
                         .keyboardShortcut(.defaultAction)
                         .disabled(!canSave || draft.resolvedURL == nil)
+                        .help("Save bookmark changes")
                 }
             }
         }

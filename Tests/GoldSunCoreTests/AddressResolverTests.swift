@@ -26,6 +26,17 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(url, BrowserDestination.goldSunStartPage)
     }
 
+    func testPreservesGoldSunInternalManagerURLs() {
+        XCTAssertEqual(
+            AddressResolver.resolvedURL(from: BrowserDestination.bookmarkManager.absoluteString),
+            BrowserDestination.bookmarkManager
+        )
+        XCTAssertEqual(
+            AddressResolver.resolvedURL(from: BrowserDestination.downloadManager.absoluteString),
+            BrowserDestination.downloadManager
+        )
+    }
+
     func testSearchesPlainLanguageInput() {
         let url = AddressResolver.resolvedURL(from: "swift browser architecture")
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)

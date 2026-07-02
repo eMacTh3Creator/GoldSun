@@ -55,9 +55,14 @@ private struct TabBarItemView: View {
         HStack(spacing: 6) {
             Button(action: select) {
                 HStack(spacing: 6) {
-                    Image(systemName: tabIconName)
-                        .font(.caption)
-                        .foregroundStyle(isSelected ? gold : .secondary)
+                    if tab.isLoading {
+                        Image(systemName: "circle.dotted")
+                            .font(.caption)
+                            .foregroundStyle(isSelected ? gold : .secondary)
+                            .frame(width: 16, height: 16)
+                    } else {
+                        FaviconView(url: tab.url)
+                    }
 
                     Text(tab.title.isEmpty ? "Untitled" : tab.title)
                         .lineLimit(1)
@@ -85,17 +90,6 @@ private struct TabBarItemView: View {
             RoundedRectangle(cornerRadius: 7)
                 .stroke(isSelected ? gold.opacity(0.45) : Color.clear)
         }
-    }
-
-    private var tabIconName: String {
-        if tab.isLoading {
-            return "circle.dotted"
-        }
-
-        if tab.url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
-            return "sun.max.fill"
-        }
-
-        return "globe"
+        .help(tab.url.absoluteString)
     }
 }

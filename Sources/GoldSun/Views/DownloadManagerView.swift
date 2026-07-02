@@ -35,12 +35,14 @@ struct DownloadManagerView: View {
             } label: {
                 Label("Save Link", systemImage: "link.badge.plus")
             }
+            .help("Save a link as a file")
 
             Button {
                 downloadStore.openDownloadsFolder()
             } label: {
                 Label("Downloads Folder", systemImage: "folder")
             }
+            .help("Open Downloads folder")
 
             Spacer()
 
@@ -53,14 +55,8 @@ struct DownloadManagerView: View {
             } label: {
                 Label("Clear Finished", systemImage: "xmark.circle")
             }
-            .disabled(!downloadStore.downloads.contains { item in
-                switch item.state {
-                case .completed, .failed, .cancelled:
-                    true
-                case .queued, .downloading:
-                    false
-                }
-            })
+            .disabled(!downloadStore.hasFinishedDownloads)
+            .help("Clear finished downloads")
         }
         .buttonStyle(.borderless)
         .padding(.horizontal, 12)
@@ -219,7 +215,7 @@ private struct DownloadRow: View {
     }
 }
 
-private struct SaveLinkSheet: View {
+struct SaveLinkSheet: View {
     @Binding var linkText: String
     let save: () -> Void
     @Environment(\.dismiss) private var dismiss

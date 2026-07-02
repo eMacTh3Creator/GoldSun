@@ -1,3 +1,4 @@
+import GoldSunCore
 import SwiftUI
 
 struct SidebarView: View {
@@ -26,18 +27,29 @@ struct SidebarView: View {
                 }
             }
 
-            if !bookmarkStore.bookmarks.isEmpty {
-                Section("Bookmarks") {
-                    ForEach(bookmarkStore.bookmarks.prefix(8)) { bookmark in
-                        Button {
-                            model.open(bookmark.url)
-                        } label: {
-                            Label(bookmark.title, systemImage: "bookmark")
+            Section("Bookmarks") {
+                ForEach(bookmarkStore.bookmarks.prefix(8)) { bookmark in
+                    Button {
+                        model.open(bookmark.url)
+                    } label: {
+                        HStack(spacing: 10) {
+                            FaviconView(url: bookmark.url, fallbackSystemImage: "bookmark")
+
+                            Text(bookmark.title)
                                 .lineLimit(1)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .buttonStyle(.plain)
+                    .help(bookmark.url.absoluteString)
                 }
+
+                Button {
+                    model.openBookmarkManager()
+                } label: {
+                    Label("Manage Bookmarks", systemImage: "book")
+                }
+                .buttonStyle(.plain)
+                .help("Open the built-in bookmark manager")
             }
         }
         .listStyle(.sidebar)
@@ -57,13 +69,16 @@ struct SidebarView: View {
 
 private struct SidebarTabRow: View {
     @ObservedObject var tab: BrowserTabSession
-    private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: tabIconName)
-                .foregroundStyle(tab.url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame ? gold : .secondary)
-                .frame(width: 16)
+            if tab.isLoading {
+                Image(systemName: "circle.dotted")
+                    .foregroundStyle(.secondary)
+                    .frame(width: 16)
+            } else {
+                FaviconView(url: tab.url)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(tab.title.isEmpty ? "Untitled" : tab.title)
@@ -75,23 +90,20 @@ private struct SidebarTabRow: View {
                     .lineLimit(1)
             }
         }
-    }
-
-    private var tabIconName: String {
-        if tab.isLoading {
-            return "circle.dotted"
-        }
-
-        if tab.url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
-            return "sun.max.fill"
-        }
-
-        return "globe"
+        .help(tab.url.absoluteString)
     }
 
     private var subtitle: String {
-        if tab.url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
+        if tab.url == BrowserDestination.goldSunStartPage {
             return "Start Page"
+        }
+
+        if tab.url == BrowserDestination.bookmarkManager {
+            return "Bookmark Manager"
+        }
+
+        if tab.url == BrowserDestination.downloadManager {
+            return "Download Manager"
         }
 
         return tab.url.host(percentEncoded: false) ?? tab.url.absoluteString

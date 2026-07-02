@@ -43,7 +43,12 @@ struct BrowserWindowView: View {
                 Divider()
 
                 if let selectedTab = model.selectedTab {
-                    BrowserTabView(tab: selectedTab, model: model, downloadStore: downloadStore)
+                    BrowserTabView(
+                        tab: selectedTab,
+                        model: model,
+                        bookmarkStore: bookmarkStore,
+                        downloadStore: downloadStore
+                    )
                 } else {
                     EmptyBrowserView()
                 }

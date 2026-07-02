@@ -45,6 +45,7 @@ final class BrowserModel: ObservableObject {
             createTab(url: url)
         } else {
             selectedTab?.load(url)
+            selectedTab?.title = Self.title(for: url)
             addressText = url.absoluteString
         }
     }
@@ -72,6 +73,14 @@ final class BrowserModel: ObservableObject {
 
     func openChromeWebStore() {
         newTab(address: BrowserDestination.chromeWebStore.absoluteString)
+    }
+
+    func openBookmarkManager(inNewTab: Bool = false) {
+        open(BrowserDestination.bookmarkManager, inNewTab: inNewTab)
+    }
+
+    func openDownloadManager(inNewTab: Bool = false) {
+        open(BrowserDestination.downloadManager, inNewTab: inNewTab)
     }
 
     func closeSelectedTab() {
@@ -164,6 +173,15 @@ final class BrowserModel: ObservableObject {
     }
 
     private static func title(for url: URL) -> String {
-        url == BrowserDestination.goldSunStartPage ? "GoldSun" : "New Tab"
+        switch url {
+        case BrowserDestination.goldSunStartPage:
+            "GoldSun"
+        case BrowserDestination.bookmarkManager:
+            "Bookmarks"
+        case BrowserDestination.downloadManager:
+            "Downloads"
+        default:
+            "New Tab"
+        }
     }
 }

@@ -9,7 +9,9 @@ struct GoldSunApp: App {
     @StateObject private var bookmarkStore = BookmarkStore()
     @StateObject private var updateStore = SoftwareUpdateStore()
     @StateObject private var downloadStore = DownloadStore()
-    @Environment(\.openWindow) private var openWindow
+    @AppStorage("showBookmarkBar") private var showBookmarkBar = true
+    @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
+    @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
 
     var body: some Scene {
         WindowGroup("GoldSun", id: "browser") {
@@ -81,43 +83,76 @@ struct GoldSunApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }
 
+            CommandMenu("Privacy") {
+                Toggle("Enable Ad Blocker", isOn: $adBlockEnabled)
+            }
+
             CommandMenu("Bookmarks") {
                 Button("Add Bookmark") {
                     bookmarkStore.addCurrentPage(from: browserModel.selectedTab)
                 }
                 .keyboardShortcut("d", modifiers: .command)
+                .disabled(!canBookmarkCurrentPage)
 
                 Button("Show Bookmarks") {
-                    openWindow(id: "bookmarks")
+                    if !(TabDisplayMode(rawValue: tabDisplayMode) ?? .both).showsSidebar {
+                        tabDisplayMode = TabDisplayMode.both.rawValue
+                    }
+
+                    browserModel.openBookmarkManager()
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
+
+                Toggle("Show Bookmark Bar", isOn: $showBookmarkBar)
             }
 
             CommandMenu("Downloads") {
                 Button("Show Downloads") {
-                    openWindow(id: "downloads")
+                    browserModel.openDownloadManager()
                 }
                 .keyboardShortcut("j", modifiers: [.command, .option])
 
                 Button("Open Downloads Folder") {
                     downloadStore.openDownloadsFolder()
                 }
+
+                Button("Clear Finished Downloads") {
+                    downloadStore.clearFinished()
+                }
+                .disabled(!downloadStore.hasFinishedDownloads)
             }
-        }
 
-        Window("Bookmarks", id: "bookmarks") {
-            BookmarkManagerView(model: browserModel, bookmarkStore: bookmarkStore)
-                .frame(minWidth: 760, minHeight: 460)
-        }
+            CommandMenu("Browser View") {
+                Button("Tabs in Sidebar") {
+                    tabDisplayMode = TabDisplayMode.sidebar.rawValue
+                }
 
-        Window("Downloads", id: "downloads") {
-            DownloadManagerView(downloadStore: downloadStore)
-                .frame(minWidth: 760, minHeight: 460)
+                Button("Tabs in Tab Bar") {
+                    tabDisplayMode = TabDisplayMode.topBar.rawValue
+                }
+
+                Button("Tabs in Sidebar and Tab Bar") {
+                    tabDisplayMode = TabDisplayMode.both.rawValue
+                }
+
+                Divider()
+
+                Toggle("Show Bookmark Bar", isOn: $showBookmarkBar)
+            }
         }
 
         Settings {
             SettingsView(updateStore: updateStore)
         }
+    }
+
+    private var canBookmarkCurrentPage: Bool {
+        guard let url = browserModel.selectedTab?.url,
+              !BrowserDestination.isInternal(url) else {
+            return false
+        }
+
+        return !bookmarkStore.isBookmarked(url)
     }
 }
 

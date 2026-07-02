@@ -212,6 +212,8 @@ enum GoldSunStartPage {
                   <button type="submit">Search</button>
                 </form>
                 <div class="links">
+                  <a class="link" href="goldsun://bookmarks">Bookmarks</a>
+                  <a class="link" href="goldsun://downloads">Downloads</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun">Source</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun/releases">Releases</a>
                   <a class="link" href="https://chromewebstore.google.com/">Extensions</a>

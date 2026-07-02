@@ -30,7 +30,25 @@ final class BookmarkStore: ObservableObject {
             }
     }
 
-    func add(title: String, url: URL, folder: String = "Favorites", showsInBar: Bool = true) {
+    func bookmark(for url: URL?) -> BrowserBookmark? {
+        guard let url else {
+            return nil
+        }
+
+        let key = normalizedURLKey(url)
+        return bookmarks.first { normalizedURLKey($0.url) == key }
+    }
+
+    func isBookmarked(_ url: URL?) -> Bool {
+        bookmark(for: url) != nil
+    }
+
+    @discardableResult
+    func add(title: String, url: URL, folder: String = "Favorites", showsInBar: Bool = true) -> BrowserBookmark {
+        if let existing = bookmark(for: url) {
+            return existing
+        }
+
         let bookmark = BrowserBookmark(
             title: normalizedTitle(title, fallbackURL: url),
             url: url,
@@ -40,19 +58,37 @@ final class BookmarkStore: ObservableObject {
 
         bookmarks.append(bookmark)
         save()
+        return bookmark
     }
 
-    func addCurrentPage(from tab: BrowserTabSession?) {
-        guard let tab else {
-            return
+    @discardableResult
+    func addCurrentPage(from tab: BrowserTabSession?) -> BrowserBookmark? {
+        guard let tab,
+              !BrowserDestination.isInternal(tab.url) else {
+            return nil
         }
 
-        add(title: tab.title, url: tab.url)
+        return add(title: tab.title, url: tab.url)
     }
 
-    func update(_ bookmark: BrowserBookmark) {
+    @discardableResult
+    func update(_ bookmark: BrowserBookmark) -> BrowserBookmark? {
         guard let index = bookmarks.firstIndex(where: { $0.id == bookmark.id }) else {
-            return
+            return nil
+        }
+
+        if let duplicateIndex = bookmarks.firstIndex(where: {
+            $0.id != bookmark.id && normalizedURLKey($0.url) == normalizedURLKey(bookmark.url)
+        }) {
+            var duplicate = bookmarks[duplicateIndex]
+            duplicate.title = normalizedTitle(bookmark.title, fallbackURL: bookmark.url)
+            duplicate.folder = normalizedFolder(bookmark.folder)
+            duplicate.showsInBar = bookmark.showsInBar
+            duplicate.updatedAt = Date()
+            bookmarks[duplicateIndex] = duplicate
+            bookmarks.remove(at: index)
+            save()
+            return duplicate
         }
 
         var updated = bookmark
@@ -61,6 +97,7 @@ final class BookmarkStore: ObservableObject {
         updated.updatedAt = Date()
         bookmarks[index] = updated
         save()
+        return updated
     }
 
     func delete(_ bookmark: BrowserBookmark) {
@@ -94,7 +131,12 @@ final class BookmarkStore: ObservableObject {
     private func load() {
         do {
             let data = try Data(contentsOf: fileURL)
-            bookmarks = try JSONDecoder().decode([BrowserBookmark].self, from: data)
+            let decodedBookmarks = try JSONDecoder().decode([BrowserBookmark].self, from: data)
+            bookmarks = deduplicated(decodedBookmarks)
+
+            if bookmarks.count != decodedBookmarks.count {
+                save()
+            }
         } catch {
             bookmarks = BookmarkStore.defaultBookmarks
             save()
@@ -129,6 +171,44 @@ final class BookmarkStore: ObservableObject {
     private func normalizedFolder(_ folder: String) -> String {
         let trimmed = folder.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "Favorites" : trimmed
+    }
+
+    private func normalizedURLKey(_ url: URL) -> String {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url.absoluteString
+                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                .lowercased()
+        }
+
+        components.scheme = components.scheme?.lowercased()
+        components.host = components.host?.lowercased()
+        components.fragment = nil
+
+        if components.path != "/" {
+            components.path = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            if !components.path.isEmpty {
+                components.path = "/" + components.path
+            }
+        }
+
+        return components.url?.absoluteString.lowercased() ?? url.absoluteString.lowercased()
+    }
+
+    private func deduplicated(_ bookmarks: [BrowserBookmark]) -> [BrowserBookmark] {
+        var seenURLKeys = Set<String>()
+        var uniqueBookmarks: [BrowserBookmark] = []
+
+        for bookmark in bookmarks {
+            let key = normalizedURLKey(bookmark.url)
+            guard !seenURLKeys.contains(key) else {
+                continue
+            }
+
+            seenURLKeys.insert(key)
+            uniqueBookmarks.append(bookmark)
+        }
+
+        return uniqueBookmarks
     }
 
     private static func storageURL(fileManager: FileManager) -> URL {

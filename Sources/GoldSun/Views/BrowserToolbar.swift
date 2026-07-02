@@ -7,10 +7,11 @@ struct BrowserToolbar: View {
     @ObservedObject var updateStore: SoftwareUpdateStore
     @ObservedObject var downloadStore: DownloadStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
-    @AppStorage("showBookmarkBar") private var showBookmarkBar = true
     @AppStorage("tabDisplayMode") private var tabDisplayMode = TabDisplayMode.both.rawValue
-    @Environment(\.openWindow) private var openWindow
     @FocusState private var isAddressFocused: Bool
+    @State private var isShowingDownloadsPopover = false
+    @State private var isSavingDownloadLink = false
+    @State private var downloadLinkText = ""
 
     private let gold = Color(red: 0.91, green: 0.61, blue: 0.21)
 
@@ -84,49 +85,55 @@ struct BrowserToolbar: View {
                 RoundedRectangle(cornerRadius: 9)
                     .stroke(isAddressFocused ? gold.opacity(0.82) : Color(nsColor: .separatorColor).opacity(0.42), lineWidth: 1)
             }
-
-            Button {
-                model.openAddressInNewTab()
-                isAddressFocused = false
-            } label: {
-                Image(systemName: "plus.square.on.square")
-            }
-            .help("Open address in new tab")
+            .help("Search or enter website")
 
             Button {
                 model.newTab()
+                isAddressFocused = false
             } label: {
-                Image(systemName: "plus")
+                Image(systemName: "plus.square.on.square")
             }
             .help("New tab")
 
             Button {
                 bookmarkStore.addCurrentPage(from: model.selectedTab)
             } label: {
-                Image(systemName: "star")
+                Image(systemName: isCurrentPageBookmarked ? "star.fill" : "star")
             }
-            .help("Add bookmark")
+            .disabled(isCurrentPageInternal || model.selectedTab == nil)
+            .help(isCurrentPageBookmarked ? "This page is already bookmarked" : "Add bookmark")
 
             Button {
-                openWindow(id: "bookmarks")
+                if !displayMode.showsSidebar {
+                    tabDisplayMode = TabDisplayMode.both.rawValue
+                }
+
+                model.openBookmarkManager()
             } label: {
                 Image(systemName: "book")
             }
-            .help("Bookmark manager")
+            .help("Open bookmark manager")
 
             Button {
-                openWindow(id: "downloads")
+                isShowingDownloadsPopover.toggle()
             } label: {
                 Image(systemName: "tray.and.arrow.down")
             }
             .help("Downloads")
-
-            Button {
-                showBookmarkBar.toggle()
-            } label: {
-                Image(systemName: showBookmarkBar ? "bookmark.fill" : "bookmark")
+            .popover(isPresented: $isShowingDownloadsPopover, arrowEdge: .bottom) {
+                DownloadsPopoverView(
+                    downloadStore: downloadStore,
+                    showAllDownloads: {
+                        isShowingDownloadsPopover = false
+                        model.openDownloadManager()
+                    },
+                    saveLink: {
+                        isShowingDownloadsPopover = false
+                        isSavingDownloadLink = true
+                    }
+                )
+                .frame(width: 360)
             }
-            .help(showBookmarkBar ? "Hide bookmark bar" : "Show bookmark bar")
 
             Button {
                 model.openChromeWebStore()
@@ -169,6 +176,11 @@ struct BrowserToolbar: View {
                     .frame(height: 1)
                 }
         }
+        .sheet(isPresented: $isSavingDownloadLink) {
+            SaveLinkSheet(linkText: $downloadLinkText) {
+                saveTypedDownloadLink()
+            }
+        }
     }
 
     private var displayMode: TabDisplayMode {
@@ -186,8 +198,16 @@ struct BrowserToolbar: View {
             return "magnifyingglass"
         }
 
-        if url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame {
+        if url == BrowserDestination.goldSunStartPage {
             return "sun.max.fill"
+        }
+
+        if url == BrowserDestination.bookmarkManager {
+            return "book"
+        }
+
+        if url == BrowserDestination.downloadManager {
+            return "tray.and.arrow.down"
         }
 
         if url.scheme?.caseInsensitiveCompare("https") == .orderedSame {
@@ -203,5 +223,207 @@ struct BrowserToolbar: View {
 
     private var addressIconColor: Color {
         addressIconName == "exclamationmark.triangle.fill" ? .orange : gold
+    }
+
+    private var isCurrentPageBookmarked: Bool {
+        bookmarkStore.isBookmarked(model.selectedTab?.url)
+    }
+
+    private var isCurrentPageInternal: Bool {
+        model.selectedTab.map { BrowserDestination.isInternal($0.url) } ?? true
+    }
+
+    private func saveTypedDownloadLink() {
+        let trimmed = downloadLinkText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return
+        }
+
+        let url = AddressResolver.resolvedURL(from: trimmed)
+        downloadStore.saveLinkAs(url)
+        downloadLinkText = ""
+        isSavingDownloadLink = false
+    }
+}
+
+private struct DownloadsPopoverView: View {
+    @ObservedObject var downloadStore: DownloadStore
+    let showAllDownloads: () -> Void
+    let saveLink: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Downloads")
+                    .font(.headline)
+
+                Spacer()
+
+                Button {
+                    showAllDownloads()
+                } label: {
+                    Image(systemName: "arrow.up.right.square")
+                }
+                .buttonStyle(.borderless)
+                .help("Show all downloads")
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+
+            Divider()
+
+            if downloadStore.downloads.isEmpty {
+                ContentUnavailableView("No Downloads", systemImage: "tray")
+                    .frame(height: 120)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(downloadStore.downloads.prefix(5)) { item in
+                        DownloadPopoverRow(item: item, downloadStore: downloadStore)
+
+                        if item.id != downloadStore.downloads.prefix(5).last?.id {
+                            Divider()
+                                .padding(.leading, 44)
+                        }
+                    }
+                }
+            }
+
+            Divider()
+
+            HStack(spacing: 8) {
+                Button("Save Link...", action: saveLink)
+                    .help("Save a link as a file")
+
+                Button("Folder") {
+                    downloadStore.openDownloadsFolder()
+                }
+                .help("Open Downloads folder")
+
+                Spacer()
+
+                Button("Clear") {
+                    downloadStore.clearFinished()
+                }
+                .disabled(!downloadStore.hasFinishedDownloads)
+                .help("Clear finished downloads")
+            }
+            .padding(12)
+        }
+    }
+}
+
+private struct DownloadPopoverRow: View {
+    let item: DownloadItem
+    @ObservedObject var downloadStore: DownloadStore
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: iconName)
+                .foregroundStyle(iconColor)
+                .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.filename)
+                    .lineLimit(1)
+
+                if isActive {
+                    ProgressView(value: item.progress)
+                } else {
+                    Text(statusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            if isCompleted {
+                Button {
+                    downloadStore.open(item)
+                } label: {
+                    Image(systemName: "arrow.up.right.square")
+                }
+                .buttonStyle(.borderless)
+                .help("Open download")
+            } else if isActive {
+                Button {
+                    downloadStore.cancel(item)
+                } label: {
+                    Image(systemName: "xmark.circle")
+                }
+                .buttonStyle(.borderless)
+                .help("Cancel download")
+            } else if isFailed {
+                Button {
+                    downloadStore.retry(item)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+                .help("Retry download")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .help(item.sourceURL.absoluteString)
+    }
+
+    private var isActive: Bool {
+        item.state == .queued || item.state == .downloading
+    }
+
+    private var isCompleted: Bool {
+        item.state == .completed
+    }
+
+    private var isFailed: Bool {
+        if case .failed = item.state {
+            return true
+        }
+
+        return false
+    }
+
+    private var iconName: String {
+        switch item.state {
+        case .completed:
+            "checkmark.circle.fill"
+        case .failed:
+            "exclamationmark.circle.fill"
+        case .cancelled:
+            "xmark.circle"
+        case .queued, .downloading:
+            "arrow.down.circle"
+        }
+    }
+
+    private var iconColor: Color {
+        switch item.state {
+        case .completed:
+            .green
+        case .failed:
+            .red
+        case .cancelled:
+            .secondary
+        case .queued, .downloading:
+            .accentColor
+        }
+    }
+
+    private var statusText: String {
+        switch item.state {
+        case .queued:
+            "Queued"
+        case .downloading:
+            "\(Int(item.progress * 100))%"
+        case .completed:
+            "Completed"
+        case let .failed(message):
+            message
+        case .cancelled:
+            "Cancelled"
+        }
     }
 }

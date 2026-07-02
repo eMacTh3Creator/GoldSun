@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1
+
+- Made the toolbar's left new-tab button the single New Tab control and removed the duplicate plus button.
+- Removed the bookmark-bar toggle from the toolbar; bookmark-bar visibility is now in Settings and the menu bar.
+- Prevented duplicate bookmarks, merged duplicate bookmark edits, and deduplicated previously saved bookmarks on load.
+- Added favicon rendering for tabs, sidebar tabs, bookmark rows, bookmark bar items, and the bookmark manager.
+- Moved bookmark and download management into built-in browser pages at `goldsun://bookmarks` and `goldsun://downloads`.
+- Added a Downloads popover on the toolbar icon with recent downloads, Save Link, folder, clear, and Show All actions.
+- Expanded menu bar coverage for bookmarks, downloads, tab display, bookmark bar visibility, and ad blocker toggling.
+
 ## 0.2.0
 
 - Added an offline GoldSun start page that is used at launch, for new tabs, and for Home until a custom home page is set.
