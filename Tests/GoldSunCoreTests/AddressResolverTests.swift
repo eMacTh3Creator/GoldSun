@@ -85,15 +85,6 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(WebBrowserCapability.passkeyEntitlement, "com.apple.developer.web-browser.public-key-credential")
     }
 
-    func testExtensionDefaultsTargetChromeWebStoreManifestV3() {
-        let defaults = ExtensionCompatibilityConfiguration.defaults
-
-        XCTAssertTrue(defaults.isChromeWebStoreEnabled)
-        XCTAssertEqual(defaults.installSourcePolicy, .chromeWebStore)
-        XCTAssertEqual(defaults.manifestSupportMode, .manifestV3)
-        XCTAssertTrue(defaults.requiresInstallReview)
-    }
-
     func testBookmarkStoresBarPreference() {
         let url = URL(string: "https://example.com")!
         let bookmark = BrowserBookmark(title: "Example", url: url, folder: "Favorites", showsInBar: true)

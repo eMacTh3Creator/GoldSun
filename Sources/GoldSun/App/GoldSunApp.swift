@@ -93,13 +93,6 @@ struct GoldSunApp: App {
                 .disabled(browserModel.selectedTab == nil)
             }
 
-            CommandMenu("Extensions") {
-                Button("Chrome Web Store") {
-                    browserModel.openChromeWebStore()
-                }
-                .keyboardShortcut("e", modifiers: [.command, .shift])
-            }
-
             CommandMenu("Privacy") {
                 Toggle("Enable Ad Blocker", isOn: $adBlockEnabled)
             }

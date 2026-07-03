@@ -272,7 +272,6 @@ final class BookmarkStore: ObservableObject {
     }
 
     private static let defaultBookmarks: [BrowserBookmark] = [
-        BrowserBookmark(title: "GoldSun Releases", url: URL(string: "https://github.com/eMacTh3Creator/GoldSun/releases")!),
-        BrowserBookmark(title: "Chrome Web Store", url: BrowserDestination.chromeWebStore, folder: "Extensions")
+        BrowserBookmark(title: "GoldSun Releases", url: URL(string: "https://github.com/eMacTh3Creator/GoldSun/releases")!)
     ]
 }

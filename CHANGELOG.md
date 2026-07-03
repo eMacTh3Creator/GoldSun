@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.10
+
+- Removed the Chrome Web Store toolbar button, Extensions menu, Extensions settings tab, start-page Extensions link, and default Chrome Web Store bookmark because GoldSun's current WebKit development backend cannot install Chrome extensions.
+- Kept extension runtime planning internal to the future Chromium backend instead of exposing non-working install controls in the browser UI.
+
 ## 0.2.9
 
 - Fixed prerelease launch validation on macOS by keeping Apple's restricted browser passkey entitlement out of ad-hoc signed builds.

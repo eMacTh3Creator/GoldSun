@@ -12,11 +12,6 @@ struct SettingsView: View {
                     Label("General", systemImage: "gearshape")
                 }
 
-            ExtensionsSettingsPane()
-                .tabItem {
-                    Label("Extensions", systemImage: "puzzlepiece")
-                }
-
             PrivacySettingsPane(historyStore: historyStore)
                 .tabItem {
                     Label("Privacy", systemImage: "shield")
@@ -73,44 +68,6 @@ private struct GeneralSettingsPane: View {
 
             Section("Bookmarks") {
                 Toggle("Show bookmark bar", isOn: $showBookmarkBar)
-            }
-        }
-        .formStyle(.grouped)
-    }
-}
-
-private struct ExtensionsSettingsPane: View {
-    @AppStorage("extensions.chromeWebStoreEnabled") private var chromeWebStoreEnabled = ExtensionCompatibilityConfiguration.defaults.isChromeWebStoreEnabled
-    @AppStorage("extensions.installSourcePolicy") private var installSourcePolicy = ExtensionCompatibilityConfiguration.defaults.installSourcePolicy.rawValue
-    @AppStorage("extensions.manifestSupportMode") private var manifestSupportMode = ExtensionCompatibilityConfiguration.defaults.manifestSupportMode.rawValue
-    @AppStorage("extensions.requiresInstallReview") private var requiresInstallReview = ExtensionCompatibilityConfiguration.defaults.requiresInstallReview
-    @AppStorage("extensions.autoUpdate") private var autoUpdate = ExtensionCompatibilityConfiguration.defaults.updatesExtensionsAutomatically
-    @AppStorage("extensions.allowIncognito") private var allowIncognito = ExtensionCompatibilityConfiguration.defaults.allowsIncognitoExtensions
-
-    var body: some View {
-        Form {
-            Section("Store") {
-                Toggle("Enable Chrome Web Store", isOn: $chromeWebStoreEnabled)
-
-                Picker("Install sources", selection: $installSourcePolicy) {
-                    ForEach(ExtensionInstallSourcePolicy.allCases) { policy in
-                        Text(policy.displayName)
-                            .tag(policy.rawValue)
-                    }
-                }
-            }
-
-            Section("Runtime") {
-                Picker("Manifest support", selection: $manifestSupportMode) {
-                    ForEach(ExtensionManifestSupportMode.allCases) { mode in
-                        Text(mode.displayName)
-                            .tag(mode.rawValue)
-                    }
-                }
-
-                Toggle("Review permissions before install", isOn: $requiresInstallReview)
-                Toggle("Update extensions automatically", isOn: $autoUpdate)
-                Toggle("Allow in Private windows", isOn: $allowIncognito)
             }
         }
         .formStyle(.grouped)

@@ -62,8 +62,8 @@ struct BrowserToolbar: View {
                     isFocused: $isAddressFocused,
                     placeholder: "Search or enter website"
                 ) {
-                        model.loadAddress()
-                        isAddressFocused = false
+                    model.loadAddress()
+                    isAddressFocused = false
                 }
                 .frame(height: 20)
             }
@@ -136,13 +136,6 @@ struct BrowserToolbar: View {
                 )
                 .frame(width: 360)
             }
-
-            Button {
-                model.openChromeWebStore()
-            } label: {
-                Image(systemName: "puzzlepiece")
-            }
-            .help("Chrome Web Store")
 
             Button {
                 adBlockEnabled.toggle()

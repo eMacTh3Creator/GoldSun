@@ -313,7 +313,6 @@ enum GoldSunStartPage {
                   <a class="link" href="goldsun://downloads">Downloads</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun">Source</a>
                   <a class="link" href="https://github.com/eMacTh3Creator/GoldSun/releases">Releases</a>
-                  <a class="link" href="https://chromewebstore.google.com/">Extensions</a>
                 </div>
                 <div class="proof" aria-label="GoldSun priorities">
                   <span>HTTPS first</span>

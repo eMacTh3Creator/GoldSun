@@ -6,7 +6,6 @@ public enum BrowserDestination {
     public static let downloadManager = URL(string: "goldsun://downloads")!
     public static let historyManager = URL(string: "goldsun://history")!
     public static let passwordManager = URL(string: "goldsun://passwords")!
-    public static let chromeWebStore = URL(string: "https://chromewebstore.google.com/")!
 
     public static func isInternal(_ url: URL) -> Bool {
         url.scheme?.caseInsensitiveCompare("goldsun") == .orderedSame

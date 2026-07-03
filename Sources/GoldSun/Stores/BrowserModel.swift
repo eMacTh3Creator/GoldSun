@@ -71,10 +71,6 @@ final class BrowserModel: ObservableObject {
         selectTab(tab.id)
     }
 
-    func openChromeWebStore() {
-        newTab(address: BrowserDestination.chromeWebStore.absoluteString)
-    }
-
     func openBookmarkManager(inNewTab: Bool = false) {
         open(BrowserDestination.bookmarkManager, inNewTab: inNewTab)
     }
