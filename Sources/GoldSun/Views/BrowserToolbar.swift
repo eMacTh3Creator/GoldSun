@@ -8,7 +8,7 @@ struct BrowserToolbar: View {
     @ObservedObject var downloadStore: DownloadStore
     @ObservedObject var passwordStore: PasswordStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
-    @FocusState private var isAddressFocused: Bool
+    @State private var isAddressFocused = false
     @State private var isShowingDownloadsPopover = false
     @State private var isSavingDownloadLink = false
     @State private var downloadLinkText = ""
@@ -57,13 +57,15 @@ struct BrowserToolbar: View {
                     .foregroundStyle(addressIconColor)
                     .frame(width: 14)
 
-                TextField("Search or enter website", text: $model.addressText)
-                    .textFieldStyle(.plain)
-                    .focused($isAddressFocused)
-                    .onSubmit {
+                SelectAllAddressField(
+                    text: $model.addressText,
+                    isFocused: $isAddressFocused,
+                    placeholder: "Search or enter website"
+                ) {
                         model.loadAddress()
                         isAddressFocused = false
-                    }
+                }
+                .frame(height: 20)
             }
             .padding(.horizontal, 11)
             .padding(.vertical, 7)
@@ -99,6 +101,13 @@ struct BrowserToolbar: View {
                 Image(systemName: "book")
             }
             .help("Open bookmark manager")
+
+            Button {
+                model.openHistoryManager()
+            } label: {
+                Image(systemName: "clock.arrow.circlepath")
+            }
+            .help("Open browsing history")
 
             Button {
                 model.openPasswordManager()
@@ -191,6 +200,10 @@ struct BrowserToolbar: View {
 
         if url == BrowserDestination.downloadManager {
             return "tray.and.arrow.down"
+        }
+
+        if url == BrowserDestination.historyManager {
+            return "clock.arrow.circlepath"
         }
 
         if url == BrowserDestination.passwordManager {

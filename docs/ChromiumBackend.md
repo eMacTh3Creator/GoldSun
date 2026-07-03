@@ -2,6 +2,8 @@
 
 GoldSun's intended backend is Chromium. On macOS, the practical embedding route for a Swift-native app is Chromium Embedded Framework (CEF), because raw Chromium is not designed as a small embeddable framework.
 
+Current compatibility target: Chrome Stable `150.0.7871.46` / Chromium revision `1639810`.
+
 ## Recommended integration
 
 1. Vendor a pinned CEF binary distribution under a reproducible dependency step.

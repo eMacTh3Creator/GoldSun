@@ -5,6 +5,7 @@ import WebKit
 struct WebKitBrowserView: NSViewRepresentable {
     @ObservedObject var tab: BrowserTabSession
     @ObservedObject var downloadStore: DownloadStore
+    @ObservedObject var historyStore: HistoryStore
     @ObservedObject var passwordStore: PasswordStore
     let openURLInNewTab: (URL) -> Void
     let openURLInNewWindow: (URL) -> Void
@@ -13,6 +14,7 @@ struct WebKitBrowserView: NSViewRepresentable {
         Coordinator(
             tab: tab,
             downloadStore: downloadStore,
+            historyStore: historyStore,
             passwordStore: passwordStore,
             openURLInNewTab: openURLInNewTab,
             openURLInNewWindow: openURLInNewWindow
@@ -25,6 +27,7 @@ struct WebKitBrowserView: NSViewRepresentable {
         configurePasswordManager(for: configuration, coordinator: context.coordinator)
 
         let webView = GoldSunWebView(frame: .zero, configuration: configuration)
+        webView.customUserAgent = ChromiumRuntimeVersion.macChromeCompatibleUserAgent
         webView.openURLInNewTab = openURLInNewTab
         webView.openURLInNewWindow = openURLInNewWindow
         webView.navigationDelegate = context.coordinator
@@ -42,6 +45,7 @@ struct WebKitBrowserView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.tab = tab
         context.coordinator.downloadStore = downloadStore
+        context.coordinator.historyStore = historyStore
         context.coordinator.passwordStore = passwordStore
         context.coordinator.openURLInNewTab = openURLInNewTab
         context.coordinator.openURLInNewWindow = openURLInNewWindow
@@ -106,8 +110,9 @@ struct WebKitBrowserView: NSViewRepresentable {
           if (window.__goldsunPasswordsInstalled) { return; }
           window.__goldsunPasswordsInstalled = true;
 
-          function candidateUsernameInput(form, passwordInput) {
-            var inputs = Array.prototype.slice.call(form.querySelectorAll('input'));
+          function candidateUsernameInput(root, passwordInput) {
+            if (!root || !root.querySelectorAll) { return null; }
+            var inputs = Array.prototype.slice.call(root.querySelectorAll('input'));
             var passwordIndex = inputs.indexOf(passwordInput);
             var preferred = inputs.filter(function (input, index) {
               if (index > passwordIndex) { return false; }
@@ -128,29 +133,120 @@ struct WebKitBrowserView: NSViewRepresentable {
             return fallback.length > 0 ? fallback[fallback.length - 1] : null;
           }
 
+          function postMessage(payload) {
+            if (payload && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.goldsunPasswords) {
+              window.webkit.messageHandlers.goldsunPasswords.postMessage(payload);
+            }
+          }
+
+          function rememberUsername(input) {
+            if (!input || input.type === 'password' || !input.value) { return; }
+            var type = (input.getAttribute('type') || 'text').toLowerCase();
+            var name = ((input.getAttribute('name') || '') + ' ' + (input.getAttribute('id') || '') + ' ' + (input.getAttribute('autocomplete') || '')).toLowerCase();
+            var likelyUsername = ['email', 'text', 'tel'].indexOf(type) !== -1
+              && (name.indexOf('user') !== -1 || name.indexOf('email') !== -1 || name.indexOf('login') !== -1 || name.indexOf('identifier') !== -1 || type === 'email');
+            if (!likelyUsername) { return; }
+
+            try {
+              window.sessionStorage.setItem('__goldsunLastUsername:' + window.location.origin, input.value);
+            } catch (error) {
+              window.__goldsunLastUsername = input.value;
+            }
+          }
+
+          function rememberedUsername() {
+            try {
+              return window.sessionStorage.getItem('__goldsunLastUsername:' + window.location.origin) || window.__goldsunLastUsername || '';
+            } catch (error) {
+              return window.__goldsunLastUsername || '';
+            }
+          }
+
           function dispatchInputEvents(input) {
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
           }
 
-          function passwordFormPayload(form) {
-            var passwordInput = form.querySelector('input[type="password"]');
+          function visiblePasswordInputs(root) {
+            return Array.prototype.slice.call(root.querySelectorAll('input[type="password"]')).filter(function (input) {
+              return input.value && !input.disabled && input.offsetParent !== null;
+            });
+          }
+
+          function passwordPayload(root, reason) {
+            root = root && root.querySelectorAll ? root : document;
+            var passwordInputs = visiblePasswordInputs(root);
+            if (passwordInputs.length === 0 && root !== document) {
+              passwordInputs = visiblePasswordInputs(document);
+            }
+            var passwordInput = passwordInputs[passwordInputs.length - 1];
             if (!passwordInput || !passwordInput.value) { return null; }
-            var usernameInput = candidateUsernameInput(form, passwordInput);
+            var scope = passwordInput.form || passwordInput.closest('form') || root;
+            var usernameInput = candidateUsernameInput(scope, passwordInput) || candidateUsernameInput(document, passwordInput);
+            var username = usernameInput && usernameInput.value ? usernameInput.value : rememberedUsername();
             return {
               kind: 'submit',
+              reason: reason,
               origin: window.location.origin,
-              action: form.action || window.location.href,
+              action: passwordInput.form ? passwordInput.form.action || window.location.href : window.location.href,
               title: document.title || window.location.hostname,
-              username: usernameInput ? usernameInput.value : '',
+              username: username || '',
               password: passwordInput.value
             };
           }
 
+          function postPasswordPayload(root, reason) {
+            postMessage(passwordPayload(root, reason));
+          }
+
           document.addEventListener('submit', function (event) {
-            var payload = passwordFormPayload(event.target);
-            if (payload && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.goldsunPasswords) {
-              window.webkit.messageHandlers.goldsunPasswords.postMessage(payload);
+            postPasswordPayload(event.target, 'submit');
+          }, true);
+
+          document.addEventListener('input', function (event) {
+            rememberUsername(event.target);
+          }, true);
+
+          document.addEventListener('change', function (event) {
+            rememberUsername(event.target);
+          }, true);
+
+          document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+              window.setTimeout(function () {
+                postPasswordPayload(document, 'enter');
+              }, 0);
+            }
+          }, true);
+
+          document.addEventListener('click', function (event) {
+            var node = event.target;
+            var shouldCheck = false;
+            while (node && node !== document) {
+              var tagName = (node.tagName || '').toLowerCase();
+              var type = (node.getAttribute && (node.getAttribute('type') || '').toLowerCase()) || '';
+              var role = (node.getAttribute && (node.getAttribute('role') || '').toLowerCase()) || '';
+              if (tagName === 'button' || type === 'submit' || role === 'button' || tagName === 'a') {
+                shouldCheck = true;
+                break;
+              }
+              node = node.parentElement;
+            }
+
+            if (shouldCheck) {
+              window.setTimeout(function () {
+                postPasswordPayload(document, 'click');
+              }, 0);
+            }
+          }, true);
+
+          window.addEventListener('pagehide', function () {
+            postPasswordPayload(document, 'pagehide');
+          }, true);
+
+          document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+              postPasswordPayload(document, 'hidden');
             }
           }, true);
 
@@ -165,12 +261,10 @@ struct WebKitBrowserView: NSViewRepresentable {
               node = node.parentElement;
             }
 
-            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.goldsunPasswords) {
-              window.webkit.messageHandlers.goldsunPasswords.postMessage({
-                kind: 'contextMenuLink',
-                href: href
-              });
-            }
+            postMessage({
+              kind: 'contextMenuLink',
+              href: href
+            });
           }, true);
 
           window.__goldsunFillPassword = function (username, password) {
@@ -196,6 +290,7 @@ struct WebKitBrowserView: NSViewRepresentable {
 
         weak var tab: BrowserTabSession?
         weak var downloadStore: DownloadStore?
+        weak var historyStore: HistoryStore?
         weak var passwordStore: PasswordStore?
         private weak var webView: GoldSunWebView?
         var openURLInNewTab: (URL) -> Void
@@ -209,12 +304,14 @@ struct WebKitBrowserView: NSViewRepresentable {
         init(
             tab: BrowserTabSession,
             downloadStore: DownloadStore,
+            historyStore: HistoryStore,
             passwordStore: PasswordStore,
             openURLInNewTab: @escaping (URL) -> Void,
             openURLInNewWindow: @escaping (URL) -> Void
         ) {
             self.tab = tab
             self.downloadStore = downloadStore
+            self.historyStore = historyStore
             self.passwordStore = passwordStore
             self.openURLInNewTab = openURLInNewTab
             self.openURLInNewWindow = openURLInNewWindow
@@ -295,6 +392,7 @@ struct WebKitBrowserView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             syncNavigationState(from: webView)
+            recordHistory(from: webView)
             autofillPassword(in: webView)
         }
 
@@ -497,6 +595,8 @@ struct WebKitBrowserView: NSViewRepresentable {
                 "Bookmarks"
             case BrowserDestination.downloadManager:
                 "Downloads"
+            case BrowserDestination.historyManager:
+                "History"
             case BrowserDestination.passwordManager:
                 "Passwords"
             case BrowserDestination.goldSunStartPage:
@@ -543,6 +643,14 @@ struct WebKitBrowserView: NSViewRepresentable {
             let username = Self.javaScriptLiteral(autofill.credential.username)
             let password = Self.javaScriptLiteral(autofill.password)
             webView.evaluateJavaScript("window.__goldsunFillPassword && window.__goldsunFillPassword(\(username), \(password));")
+        }
+
+        private func recordHistory(from webView: WKWebView) {
+            guard !isShowingStartPage else {
+                return
+            }
+
+            historyStore?.record(title: webView.title, url: webView.url)
         }
 
         private static func javaScriptLiteral(_ value: String) -> String {

@@ -83,6 +83,10 @@ final class BrowserModel: ObservableObject {
         open(BrowserDestination.downloadManager, inNewTab: inNewTab)
     }
 
+    func openHistoryManager(inNewTab: Bool = false) {
+        open(BrowserDestination.historyManager, inNewTab: inNewTab)
+    }
+
     func openPasswordManager(inNewTab: Bool = false) {
         open(BrowserDestination.passwordManager, inNewTab: inNewTab)
     }
@@ -125,6 +129,14 @@ final class BrowserModel: ObservableObject {
     }
 
     func goBack() {
+        if let selectedTab,
+           BrowserDestination.isNativePage(selectedTab.url),
+           let nativeBackURL = selectedTab.nativeBackURL {
+            selectedTab.nativeBackURL = nil
+            open(nativeBackURL)
+            return
+        }
+
         selectedTab?.request(.goBack)
     }
 
@@ -184,6 +196,8 @@ final class BrowserModel: ObservableObject {
             "Bookmarks"
         case BrowserDestination.downloadManager:
             "Downloads"
+        case BrowserDestination.historyManager:
+            "History"
         case BrowserDestination.passwordManager:
             "Passwords"
         default:

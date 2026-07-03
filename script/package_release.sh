@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.2.7}"
+VERSION="${1:-0.2.8}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
@@ -65,6 +65,53 @@ cat >"$INFO_PLIST" <<PLIST
   <string>6.0</string>
   <key>CFBundleName</key>
   <string>$APP_NAME</string>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>Web site URL</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>http</string>
+        <string>https</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>Local file URL</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>file</string>
+      </array>
+    </dict>
+  </array>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.html</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.xhtml</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.url</string>
+      </array>
+    </dict>
+  </array>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

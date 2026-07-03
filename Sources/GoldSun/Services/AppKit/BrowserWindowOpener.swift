@@ -10,6 +10,7 @@ final class BrowserWindowOpener: NSObject, ObservableObject, NSWindowDelegate {
         bookmarkStore: BookmarkStore,
         updateStore: SoftwareUpdateStore,
         downloadStore: DownloadStore,
+        historyStore: HistoryStore,
         passwordStore: PasswordStore
     ) {
         let model = BrowserModel(initialURL: initialURL)
@@ -18,12 +19,14 @@ final class BrowserWindowOpener: NSObject, ObservableObject, NSWindowDelegate {
             bookmarkStore: bookmarkStore,
             updateStore: updateStore,
             downloadStore: downloadStore,
+            historyStore: historyStore,
             passwordStore: passwordStore,
-            openURLInNewWindow: { [weak self, weak bookmarkStore, weak updateStore, weak downloadStore, weak passwordStore] url in
+            openURLInNewWindow: { [weak self, weak bookmarkStore, weak updateStore, weak downloadStore, weak historyStore, weak passwordStore] url in
                 guard let self,
                       let bookmarkStore,
                       let updateStore,
                       let downloadStore,
+                      let historyStore,
                       let passwordStore else {
                     return
                 }
@@ -33,6 +36,7 @@ final class BrowserWindowOpener: NSObject, ObservableObject, NSWindowDelegate {
                     bookmarkStore: bookmarkStore,
                     updateStore: updateStore,
                     downloadStore: downloadStore,
+                    historyStore: historyStore,
                     passwordStore: passwordStore
                 )
             }

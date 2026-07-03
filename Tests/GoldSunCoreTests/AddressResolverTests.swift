@@ -36,6 +36,10 @@ final class AddressResolverTests: XCTestCase {
             BrowserDestination.downloadManager
         )
         XCTAssertEqual(
+            AddressResolver.resolvedURL(from: BrowserDestination.historyManager.absoluteString),
+            BrowserDestination.historyManager
+        )
+        XCTAssertEqual(
             AddressResolver.resolvedURL(from: BrowserDestination.passwordManager.absoluteString),
             BrowserDestination.passwordManager
         )
@@ -67,6 +71,18 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertTrue(defaults.blocksAutomaticPopups)
         XCTAssertTrue(defaults.stripsTrackingParameters)
         XCTAssertFalse(defaults.privateBrowsingByDefault)
+    }
+
+    func testHistoryDefaultsAreEnabled() {
+        XCTAssertTrue(BrowserHistoryConfiguration.defaults.isEnabled)
+        XCTAssertEqual(BrowserHistoryPreferenceKey.isEnabled, "history.isEnabled")
+    }
+
+    func testChromiumCompatibilityTargetUsesCurrentStableMajorUserAgent() {
+        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodVersion, "150.0.7871.46")
+        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodRevision, "1639810")
+        XCTAssertTrue(ChromiumRuntimeVersion.macChromeCompatibleUserAgent.contains("Chrome/150.0.0.0"))
+        XCTAssertEqual(WebBrowserCapability.passkeyEntitlement, "com.apple.developer.web-browser.public-key-credential")
     }
 
     func testExtensionDefaultsTargetChromeWebStoreManifestV3() {

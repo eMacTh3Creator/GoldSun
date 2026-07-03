@@ -5,6 +5,8 @@ struct ChromiumEngineBridge {
     let runtimeDirectory: URL
     let extensionPlan: ChromeExtensionBridgePlan
     let adBlockPlan: NativeAdBlockEnginePlan
+    let targetVersion = ChromiumRuntimeVersion.latestKnownGoodVersion
+    let targetRevision = ChromiumRuntimeVersion.latestKnownGoodRevision
 
     var engineKind: BrowserEngineKind {
         .chromiumCEF

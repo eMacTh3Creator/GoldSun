@@ -6,6 +6,7 @@ struct BrowserTabView: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var downloadStore: DownloadStore
+    @ObservedObject var historyStore: HistoryStore
     @ObservedObject var passwordStore: PasswordStore
     let openURLInNewWindow: (URL) -> Void
 
@@ -28,6 +29,8 @@ struct BrowserTabView: View {
             BookmarkManagerView(model: model, bookmarkStore: bookmarkStore)
         case BrowserDestination.downloadManager:
             DownloadManagerView(downloadStore: downloadStore)
+        case BrowserDestination.historyManager:
+            HistoryManagerView(model: model, historyStore: historyStore)
         case BrowserDestination.passwordManager:
             PasswordManagerView(model: model, passwordStore: passwordStore)
         default:
@@ -35,6 +38,7 @@ struct BrowserTabView: View {
                 tab: tab,
                 model: model,
                 downloadStore: downloadStore,
+                historyStore: historyStore,
                 passwordStore: passwordStore,
                 openURLInNewWindow: openURLInNewWindow
             )

@@ -10,9 +10,11 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Core library target: `GoldSunCore`
 - Native SwiftUI window, top tab bar, toolbar, settings scene, and menu commands
 - Home navigation, bookmark bar, and native bookmark manager page
+- Native browsing history page with search, delete, clear, favicon rows, and a privacy setting to disable history saving
 - Browser-compatible bookmark import/export for Safari, Chrome, Edge, Firefox, and GoldSun backups
 - Downloads manager with link saving, progress, open, reveal, cancel, retry, and clear actions
-- Keychain-backed password manager with browser CSV import/export, exact-origin autofill, and submitted-login capture
+- Keychain-backed password manager with browser CSV import/export, exact-origin autofill, submitted-login capture, and native save prompts
+- macOS browser registration for default-browser selection plus signed-build passkey entitlement wiring
 - AppKit bridge for an embedded development web view
 - Chrome Web Store / Manifest V3 compatibility planning and native settings
 - Built-in ad blocker preferences with filter-list options
@@ -26,7 +28,7 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - URL/search normalization with tests
 - Codex Run action wired through `script/build_and_run.sh`
 
-The app is runnable today with a WebKit development shim. Chrome Web Store extensions and the production ad blocker are Chromium-backend features; their user-facing settings and adapter boundaries are scaffolded now so the next implementation step can vendor CEF or another Chromium embedding layer without rewriting the SwiftUI shell.
+The app is runnable today with a WebKit development shim that advertises the current Chrome stable compatibility target for stricter sites like Gmail. Chrome Web Store extensions and the production ad blocker are Chromium-backend features; their user-facing settings and adapter boundaries are scaffolded now so the next implementation step can vendor CEF or another Chromium embedding layer without rewriting the SwiftUI shell.
 
 ## Run
 
@@ -52,10 +54,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.7](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.7).
+Download the current prerelease installer from [GoldSun v0.2.8](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.8).
 
 ```bash
-./script/package_release.sh 0.2.7
+./script/package_release.sh 0.2.8
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

@@ -14,6 +14,7 @@ final class BrowserTabSession: ObservableObject, Identifiable {
     @Published var canGoForward: Bool
     @Published var navigationRequest: BrowserNavigationRequest
     @Published var pendingAction: BrowserAction?
+    var nativeBackURL: URL?
 
     init(
         id: UUID = UUID(),
@@ -33,16 +34,22 @@ final class BrowserTabSession: ObservableObject, Identifiable {
     }
 
     func load(_ url: URL) {
+        let currentURL = self.url
         self.url = url
 
         if BrowserDestination.isNativePage(url) {
+            if currentURL != url {
+                nativeBackURL = currentURL
+            }
+
             isLoading = false
             estimatedProgress = 1
-            canGoBack = false
+            canGoBack = nativeBackURL != nil
             canGoForward = false
             return
         }
 
+        nativeBackURL = nil
         navigationRequest = BrowserNavigationRequest(url: url)
 
         if BrowserDestination.isInternal(url) {

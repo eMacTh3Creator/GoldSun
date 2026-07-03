@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.8
+
+- Added browsing history with a native `goldsun://history` manager page, toolbar/start-page/menu entry points, favicon rows, search, delete, and clear actions.
+- Added a Privacy setting to turn history saving on or off, with history recording disabled immediately when the setting is off.
+- Updated the address bar so focusing it selects the full URL/search text for faster copying, pasting, and replacement typing.
+- Improved Back from built-in manager pages so History, Bookmarks, Downloads, and Passwords can return to the page that opened them.
+- Added macOS browser registration metadata for `http`, `https`, and local file URLs so GoldSun can appear as a selectable default browser.
+- Added the macOS browser passkey entitlement for native WebAuthn/passkey support in signed builds.
+- Updated the WebKit development shim to use the current Chrome 150 stable compatibility target for sites such as Gmail while the Chromium backend is integrated.
+- Added a native save-password prompt and broader login capture for JavaScript-heavy sites such as Gmail.
+
 ## 0.2.7
 
 - Added distinct right-click link actions for opening links in a new tab or a real separate browser window.

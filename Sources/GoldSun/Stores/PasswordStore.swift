@@ -13,6 +13,32 @@ struct PasswordAutofillCredential: Equatable {
     let password: String
 }
 
+struct PasswordSavePrompt: Equatable, Identifiable {
+    let id: UUID
+    let title: String
+    let origin: URL
+    let username: String
+    let password: String
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        origin: URL,
+        username: String,
+        password: String
+    ) {
+        self.id = id
+        self.title = title
+        self.origin = origin
+        self.username = username
+        self.password = password
+    }
+
+    var host: String {
+        origin.host(percentEncoded: false) ?? origin.absoluteString
+    }
+}
+
 enum PasswordStoreError: LocalizedError {
     case unsupportedURL
     case keychain(OSStatus)
@@ -31,13 +57,16 @@ enum PasswordStoreError: LocalizedError {
 @MainActor
 final class PasswordStore: ObservableObject {
     @Published private(set) var credentials: [PasswordCredential]
+    @Published private(set) var pendingSavePrompt: PasswordSavePrompt?
 
     private let fileURL: URL
     private let keychainService = "com.goldsun.browser.passwords"
+    private var recentlyPromptedKeys: [String: Date] = [:]
 
     init(fileManager: FileManager = .default) {
         fileURL = PasswordStore.storageURL(fileManager: fileManager)
         credentials = []
+        pendingSavePrompt = nil
         load()
     }
 
@@ -106,11 +135,61 @@ final class PasswordStore: ObservableObject {
 
         guard isEnabled,
               savesSubmittedPasswords,
-              !password.isEmpty else {
+              !password.isEmpty,
+              let normalizedOrigin = normalizedOrigin(from: origin) else {
             return nil
         }
 
-        return try? upsert(title: title, origin: origin, username: username, password: password)
+        let normalizedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let existing = existingCredential(origin: normalizedOrigin, username: normalizedUsername),
+           let existingPassword = try? readPassword(for: existing.id),
+           existingPassword == password {
+            return existing
+        }
+
+        let prompt = PasswordSavePrompt(
+            title: normalizedTitle(title, fallbackURL: normalizedOrigin),
+            origin: normalizedOrigin,
+            username: normalizedUsername,
+            password: password
+        )
+
+        guard shouldShowPrompt(prompt) else {
+            return nil
+        }
+
+        pendingSavePrompt = prompt
+        recentlyPromptedKeys[promptKey(for: prompt)] = Date()
+        return nil
+    }
+
+    func isUpdatePrompt(_ prompt: PasswordSavePrompt) -> Bool {
+        existingCredential(origin: prompt.origin, username: prompt.username) != nil
+    }
+
+    @discardableResult
+    func savePrompt(_ prompt: PasswordSavePrompt) throws -> PasswordCredential {
+        let credential = try upsert(
+            title: prompt.title,
+            origin: prompt.origin,
+            username: prompt.username,
+            password: prompt.password
+        )
+
+        if pendingSavePrompt?.id == prompt.id {
+            pendingSavePrompt = nil
+        }
+
+        return credential
+    }
+
+    func dismissPrompt(_ prompt: PasswordSavePrompt?) {
+        guard prompt == nil || pendingSavePrompt?.id == prompt?.id else {
+            return
+        }
+
+        pendingSavePrompt = nil
     }
 
     func autofillCredential(for pageURL: URL) -> PasswordAutofillCredential? {
@@ -330,6 +409,34 @@ final class PasswordStore: ObservableObject {
 
     private func normalizedOriginKey(_ url: URL) -> String {
         normalizedOrigin(from: url)?.absoluteString.lowercased() ?? url.absoluteString.lowercased()
+    }
+
+    private func existingCredential(origin: URL, username: String) -> PasswordCredential? {
+        let key = normalizedOriginKey(origin)
+        return credentials.first {
+            normalizedOriginKey($0.origin) == key
+                && $0.username == username
+        }
+    }
+
+    private func shouldShowPrompt(_ prompt: PasswordSavePrompt) -> Bool {
+        if pendingSavePrompt.map({ promptKey(for: $0) }) == promptKey(for: prompt) {
+            return false
+        }
+
+        let now = Date()
+        recentlyPromptedKeys = recentlyPromptedKeys.filter { now.timeIntervalSince($0.value) < 60 }
+
+        if let promptedAt = recentlyPromptedKeys[promptKey(for: prompt)],
+           now.timeIntervalSince(promptedAt) < 30 {
+            return false
+        }
+
+        return true
+    }
+
+    private func promptKey(for prompt: PasswordSavePrompt) -> String {
+        "\(normalizedOriginKey(prompt.origin))|\(prompt.username)|\(prompt.password)"
     }
 
     private func normalizedTitle(_ title: String, fallbackURL: URL) -> String {

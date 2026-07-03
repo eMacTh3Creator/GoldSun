@@ -9,6 +9,7 @@ struct GoldSunApp: App {
     @StateObject private var bookmarkStore = BookmarkStore()
     @StateObject private var updateStore = SoftwareUpdateStore()
     @StateObject private var downloadStore = DownloadStore()
+    @StateObject private var historyStore = HistoryStore()
     @StateObject private var passwordStore = PasswordStore()
     @StateObject private var browserWindowOpener = BrowserWindowOpener()
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
@@ -21,6 +22,7 @@ struct GoldSunApp: App {
                 bookmarkStore: bookmarkStore,
                 updateStore: updateStore,
                 downloadStore: downloadStore,
+                historyStore: historyStore,
                 passwordStore: passwordStore,
                 openURLInNewWindow: { url in
                     browserWindowOpener.openWindow(
@@ -28,11 +30,15 @@ struct GoldSunApp: App {
                         bookmarkStore: bookmarkStore,
                         updateStore: updateStore,
                         downloadStore: downloadStore,
+                        historyStore: historyStore,
                         passwordStore: passwordStore
                     )
                 }
             )
                 .frame(minWidth: 960, minHeight: 620)
+                .onOpenURL { url in
+                    browserModel.open(url)
+                }
         }
         .windowToolbarStyle(.unifiedCompact)
         .commands {
@@ -96,6 +102,18 @@ struct GoldSunApp: App {
 
             CommandMenu("Privacy") {
                 Toggle("Enable Ad Blocker", isOn: $adBlockEnabled)
+            }
+
+            CommandMenu("History") {
+                Button("Show History") {
+                    browserModel.openHistoryManager()
+                }
+                .keyboardShortcut("y", modifiers: .command)
+
+                Button("Clear History") {
+                    historyStore.clear()
+                }
+                .disabled(historyStore.entries.isEmpty)
             }
 
             CommandMenu("Bookmarks") {
@@ -179,7 +197,7 @@ struct GoldSunApp: App {
         }
 
         Settings {
-            SettingsView(updateStore: updateStore)
+            SettingsView(updateStore: updateStore, historyStore: historyStore)
         }
     }
 

@@ -48,6 +48,10 @@ struct FaviconView: View {
             "book"
         case BrowserDestination.downloadManager:
             "tray.and.arrow.down"
+        case BrowserDestination.historyManager:
+            "clock.arrow.circlepath"
+        case BrowserDestination.passwordManager:
+            "key.fill"
         default:
             nil
         }

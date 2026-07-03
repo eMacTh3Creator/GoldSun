@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var updateStore: SoftwareUpdateStore
+    @ObservedObject var historyStore: HistoryStore
 
     var body: some View {
         TabView {
@@ -16,7 +17,7 @@ struct SettingsView: View {
                     Label("Extensions", systemImage: "puzzlepiece")
                 }
 
-            PrivacySettingsPane()
+            PrivacySettingsPane(historyStore: historyStore)
                 .tabItem {
                     Label("Privacy", systemImage: "shield")
                 }
@@ -117,6 +118,7 @@ private struct ExtensionsSettingsPane: View {
 }
 
 private struct PrivacySettingsPane: View {
+    @ObservedObject var historyStore: HistoryStore
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
     @AppStorage("adBlockProtectionLevel") private var protectionLevel = AdBlockConfiguration.defaults.protectionLevel.rawValue
     @AppStorage("adBlockBlocksTrackers") private var blocksTrackers = AdBlockConfiguration.defaults.blocksTrackers
@@ -129,6 +131,7 @@ private struct PrivacySettingsPane: View {
     @AppStorage(BrowserSecurityPreferenceKey.javaScriptEnabled) private var javaScriptEnabled = BrowserSecurityConfiguration.defaults.javaScriptEnabled
     @AppStorage(BrowserSecurityPreferenceKey.blocksAutomaticPopups) private var blocksAutomaticPopups = BrowserSecurityConfiguration.defaults.blocksAutomaticPopups
     @AppStorage(BrowserSecurityPreferenceKey.stripsTrackingParameters) private var stripsTrackingParameters = BrowserSecurityConfiguration.defaults.stripsTrackingParameters
+    @AppStorage(BrowserHistoryPreferenceKey.isEnabled) private var savesBrowsingHistory = BrowserHistoryConfiguration.defaults.isEnabled
 
     var body: some View {
         Form {
@@ -161,6 +164,15 @@ private struct PrivacySettingsPane: View {
                 Toggle("Hide blocked placeholders", isOn: $hidesPlaceholders)
                 Toggle("Allow acceptable ads", isOn: $allowsAcceptableAds)
                 Toggle("Update filter lists automatically", isOn: $autoUpdateLists)
+            }
+
+            Section("History") {
+                Toggle("Save browsing history", isOn: $savesBrowsingHistory)
+
+                Button("Clear Browsing History") {
+                    historyStore.clear()
+                }
+                .disabled(historyStore.entries.isEmpty)
             }
 
             Section("Filter Lists") {
@@ -239,12 +251,16 @@ private struct PasswordSettingsPane: View {
                 Toggle("Autofill saved passwords", isOn: $autofillEnabled)
                     .disabled(!isEnabled)
 
-                Toggle("Save submitted passwords to Keychain", isOn: $savesSubmittedPasswords)
+                Toggle("Offer to save submitted passwords", isOn: $savesSubmittedPasswords)
                     .disabled(!isEnabled)
             }
 
+            Section("Passkeys") {
+                LabeledContent("Native passkeys", value: "Enabled")
+            }
+
             Section("Storage") {
-                Text("Passwords are stored in the macOS Keychain. GoldSun keeps only site, username, and title metadata in Application Support for the built-in manager page.")
+                Text("Passwords are stored in the macOS Keychain. Passkeys use macOS WebAuthn support when GoldSun is signed with the browser passkey entitlement.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }

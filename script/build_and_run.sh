@@ -5,7 +5,7 @@ MODE="${1:-run}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
-VERSION="${GOLDSUN_VERSION:-0.2.7}"
+VERSION="${GOLDSUN_VERSION:-0.2.8}"
 export MACOSX_DEPLOYMENT_TARGET="$MIN_SYSTEM_VERSION"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -51,6 +51,53 @@ cat >"$INFO_PLIST" <<PLIST
   <string>GoldSun</string>
   <key>CFBundleName</key>
   <string>$APP_NAME</string>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>Web site URL</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>http</string>
+        <string>https</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>Local file URL</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>file</string>
+      </array>
+    </dict>
+  </array>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.html</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.xhtml</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.url</string>
+      </array>
+    </dict>
+  </array>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
