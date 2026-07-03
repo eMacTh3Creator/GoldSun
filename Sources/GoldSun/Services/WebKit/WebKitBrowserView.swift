@@ -82,6 +82,8 @@ struct WebKitBrowserView: NSViewRepresentable {
         configuration.defaultWebpagePreferences.allowsContentJavaScript = javaScriptEnabled
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = !blocksAutomaticPopups
         configuration.preferences.isFraudulentWebsiteWarningEnabled = fraudulentWebsiteWarnings
+        // YouTube and other players check document.fullscreenEnabled before showing native fullscreen controls.
+        configuration.preferences.isElementFullscreenEnabled = true
 
         if privateBrowsingByDefault {
             configuration.websiteDataStore = .nonPersistent()

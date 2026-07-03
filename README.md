@@ -16,6 +16,7 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Keychain-backed password manager with browser CSV import/export, exact-origin autofill, submitted-login capture, and native save prompts
 - macOS browser registration for default-browser selection plus signed-build passkey entitlement wiring
 - AppKit bridge for an embedded development web view
+- YouTube-compatible element fullscreen support in the WebKit development backend
 - Built-in ad blocker preferences with filter-list options
 - Bundled macOS app icon for Dock, Finder, and Applications
 - Auto updater that checks GitHub releases, downloads the installer, starts the macOS install flow, and quits GoldSun before replacement
@@ -53,10 +54,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.10](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.10).
+Download the current prerelease installer from [GoldSun v0.2.11](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.11).
 
 ```bash
-./script/package_release.sh 0.2.10
+./script/package_release.sh 0.2.11
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.11
+
+- Enabled WebKit's element fullscreen support so video sites such as YouTube can enter fullscreen from the embedded browser view.
+
 ## 0.2.10
 
 - Removed the Chrome Web Store toolbar button, Extensions menu, Extensions settings tab, start-page Extensions link, and default Chrome Web Store bookmark because GoldSun's current WebKit development backend cannot install Chrome extensions.
