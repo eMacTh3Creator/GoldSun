@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.9
+
+- Fixed prerelease launch validation on macOS by keeping Apple's restricted browser passkey entitlement out of ad-hoc signed builds.
+- Added a separate passkey entitlement file for future Developer ID signed builds that have Apple's browser passkey entitlement approval.
+- Kept default-browser registration, Gmail compatibility targeting, history, and password-save prompt work from 0.2.8.
+
 ## 0.2.8
 
 - Added browsing history with a native `goldsun://history` manager page, toolbar/start-page/menu entry points, favicon rows, search, delete, and clear actions.

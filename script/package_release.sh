@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.2.8}"
+VERSION="${1:-0.2.9}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
 SIGNING_IDENTITY="${GOLDSUN_SIGNING_IDENTITY:--}"
 INSTALLER_SIGNING_IDENTITY="${GOLDSUN_INSTALLER_SIGNING_IDENTITY:-}"
+ENABLE_PASSKEY_ENTITLEMENT="${GOLDSUN_ENABLE_PASSKEY_ENTITLEMENT:-0}"
 NOTARIZE="${GOLDSUN_NOTARIZE:-0}"
 NOTARY_PROFILE="${GOLDSUN_NOTARY_PROFILE:-}"
 
@@ -21,6 +22,7 @@ APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 APP_ICON="$ROOT_DIR/Resources/GoldSun.icns"
 ENTITLEMENTS="$ROOT_DIR/Packaging/GoldSun.entitlements"
+PASSKEY_ENTITLEMENTS="$ROOT_DIR/Packaging/GoldSun.passkeys.entitlements"
 PKG_ROOT="$BUILD_DIR/pkgroot"
 COMPONENT_PKG="$BUILD_DIR/$APP_NAME-component.pkg"
 INSTALLER_PKG="$RELEASE_DIR/$APP_NAME-$VERSION.pkg"
@@ -131,6 +133,15 @@ cat >"$INFO_PLIST" <<PLIST
 PLIST
 
 xattr -cr "$APP_BUNDLE" 2>/dev/null || true
+
+if [[ "$ENABLE_PASSKEY_ENTITLEMENT" == "1" ]]; then
+  if [[ "$SIGNING_IDENTITY" == "-" ]]; then
+    echo "GOLDSUN_ENABLE_PASSKEY_ENTITLEMENT=1 requires a Developer ID signing identity." >&2
+    exit 2
+  fi
+
+  ENTITLEMENTS="$PASSKEY_ENTITLEMENTS"
+fi
 
 if [[ "$SIGNING_IDENTITY" == "-" ]]; then
   codesign --force --options runtime --entitlements "$ENTITLEMENTS" --sign "$SIGNING_IDENTITY" "$APP_BUNDLE"

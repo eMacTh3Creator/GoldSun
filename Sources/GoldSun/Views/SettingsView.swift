@@ -256,11 +256,11 @@ private struct PasswordSettingsPane: View {
             }
 
             Section("Passkeys") {
-                LabeledContent("Native passkeys", value: "Enabled")
+                LabeledContent("Native passkeys", value: "Signed builds")
             }
 
             Section("Storage") {
-                Text("Passwords are stored in the macOS Keychain. Passkeys use macOS WebAuthn support when GoldSun is signed with the browser passkey entitlement.")
+                Text("Passwords are stored in the macOS Keychain. Passkeys use macOS WebAuthn support in signed builds that include Apple's browser passkey entitlement.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
