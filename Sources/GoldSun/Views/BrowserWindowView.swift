@@ -7,6 +7,7 @@ struct BrowserWindowView: View {
     @ObservedObject var updateStore: SoftwareUpdateStore
     @ObservedObject var downloadStore: DownloadStore
     @ObservedObject var passwordStore: PasswordStore
+    let openURLInNewWindow: (URL) -> Void
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
 
     var body: some View {
@@ -29,17 +30,27 @@ struct BrowserWindowView: View {
 
             Divider()
 
-            if let selectedTab = model.selectedTab {
-                BrowserTabView(
-                    tab: selectedTab,
-                    model: model,
-                    bookmarkStore: bookmarkStore,
-                    downloadStore: downloadStore,
-                    passwordStore: passwordStore
-                )
-            } else {
-                EmptyBrowserView()
+            ZStack {
+                if model.tabs.isEmpty {
+                    EmptyBrowserView()
+                }
+
+                ForEach(model.tabs) { tab in
+                    BrowserTabView(
+                        tab: tab,
+                        model: model,
+                        bookmarkStore: bookmarkStore,
+                        downloadStore: downloadStore,
+                        passwordStore: passwordStore,
+                        openURLInNewWindow: openURLInNewWindow
+                    )
+                    .opacity(model.selectedTabID == tab.id ? 1 : 0)
+                    .allowsHitTesting(model.selectedTabID == tab.id)
+                    .accessibilityHidden(model.selectedTabID != tab.id)
+                    .zIndex(model.selectedTabID == tab.id ? 1 : 0)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .task {
             updateStore.startAutomaticChecks()

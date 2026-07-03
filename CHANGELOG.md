@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.7
+
+- Added distinct right-click link actions for opening links in a new tab or a real separate browser window.
+- Kept inactive tab web views mounted so tabs preserve page state, scroll position, and WebKit back/forward history when switching.
+- Improved back/forward reliability by preserving each tab's native WebKit session instead of rebuilding it on selection changes.
+
 ## 0.2.6
 
 - Removed the descriptive tagline from the built-in `goldsun://home` start page while leaving the browser and public site marketing copy intact.

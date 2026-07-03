@@ -5,6 +5,7 @@ struct EngineHostView: View {
     @ObservedObject var model: BrowserModel
     @ObservedObject var downloadStore: DownloadStore
     @ObservedObject var passwordStore: PasswordStore
+    let openURLInNewWindow: (URL) -> Void
 
     var body: some View {
         WebKitBrowserView(
@@ -13,7 +14,8 @@ struct EngineHostView: View {
             passwordStore: passwordStore,
             openURLInNewTab: { url in
                 model.open(url, inNewTab: true)
-            }
+            },
+            openURLInNewWindow: openURLInNewWindow
         )
     }
 }

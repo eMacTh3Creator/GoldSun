@@ -10,6 +10,7 @@ struct GoldSunApp: App {
     @StateObject private var updateStore = SoftwareUpdateStore()
     @StateObject private var downloadStore = DownloadStore()
     @StateObject private var passwordStore = PasswordStore()
+    @StateObject private var browserWindowOpener = BrowserWindowOpener()
     @AppStorage("showBookmarkBar") private var showBookmarkBar = true
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
 
@@ -20,7 +21,16 @@ struct GoldSunApp: App {
                 bookmarkStore: bookmarkStore,
                 updateStore: updateStore,
                 downloadStore: downloadStore,
-                passwordStore: passwordStore
+                passwordStore: passwordStore,
+                openURLInNewWindow: { url in
+                    browserWindowOpener.openWindow(
+                        initialURL: url,
+                        bookmarkStore: bookmarkStore,
+                        updateStore: updateStore,
+                        downloadStore: downloadStore,
+                        passwordStore: passwordStore
+                    )
+                }
             )
                 .frame(minWidth: 960, minHeight: 620)
         }

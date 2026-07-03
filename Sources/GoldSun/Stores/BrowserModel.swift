@@ -10,8 +10,8 @@ final class BrowserModel: ObservableObject {
 
     private var tabCancellables: [BrowserTabSession.ID: Set<AnyCancellable>]
 
-    init() {
-        let firstURL = Self.resolvedHomePage()
+    init(initialURL: URL? = nil) {
+        let firstURL = initialURL ?? Self.resolvedHomePage()
         let firstTab = BrowserTabSession(title: Self.title(for: firstURL), url: firstURL)
 
         tabs = [firstTab]

@@ -7,6 +7,7 @@ struct BrowserTabView: View {
     @ObservedObject var bookmarkStore: BookmarkStore
     @ObservedObject var downloadStore: DownloadStore
     @ObservedObject var passwordStore: PasswordStore
+    let openURLInNewWindow: (URL) -> Void
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -30,7 +31,13 @@ struct BrowserTabView: View {
         case BrowserDestination.passwordManager:
             PasswordManagerView(model: model, passwordStore: passwordStore)
         default:
-            EngineHostView(tab: tab, model: model, downloadStore: downloadStore, passwordStore: passwordStore)
+            EngineHostView(
+                tab: tab,
+                model: model,
+                downloadStore: downloadStore,
+                passwordStore: passwordStore,
+                openURLInNewWindow: openURLInNewWindow
+            )
         }
     }
 }

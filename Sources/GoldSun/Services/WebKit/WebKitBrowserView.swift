@@ -7,9 +7,16 @@ struct WebKitBrowserView: NSViewRepresentable {
     @ObservedObject var downloadStore: DownloadStore
     @ObservedObject var passwordStore: PasswordStore
     let openURLInNewTab: (URL) -> Void
+    let openURLInNewWindow: (URL) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(tab: tab, downloadStore: downloadStore, passwordStore: passwordStore, openURLInNewTab: openURLInNewTab)
+        Coordinator(
+            tab: tab,
+            downloadStore: downloadStore,
+            passwordStore: passwordStore,
+            openURLInNewTab: openURLInNewTab,
+            openURLInNewWindow: openURLInNewWindow
+        )
     }
 
     func makeNSView(context: Context) -> WKWebView {
@@ -17,7 +24,9 @@ struct WebKitBrowserView: NSViewRepresentable {
         configureSecurity(for: configuration)
         configurePasswordManager(for: configuration, coordinator: context.coordinator)
 
-        let webView = WKWebView(frame: .zero, configuration: configuration)
+        let webView = GoldSunWebView(frame: .zero, configuration: configuration)
+        webView.openURLInNewTab = openURLInNewTab
+        webView.openURLInNewWindow = openURLInNewWindow
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
@@ -35,6 +44,12 @@ struct WebKitBrowserView: NSViewRepresentable {
         context.coordinator.downloadStore = downloadStore
         context.coordinator.passwordStore = passwordStore
         context.coordinator.openURLInNewTab = openURLInNewTab
+        context.coordinator.openURLInNewWindow = openURLInNewWindow
+
+        if let goldSunWebView = webView as? GoldSunWebView {
+            goldSunWebView.openURLInNewTab = openURLInNewTab
+            goldSunWebView.openURLInNewWindow = openURLInNewWindow
+        }
 
         if context.coordinator.lastNavigationRequestID != tab.navigationRequest.id {
             context.coordinator.lastNavigationRequestID = tab.navigationRequest.id
@@ -139,6 +154,25 @@ struct WebKitBrowserView: NSViewRepresentable {
             }
           }, true);
 
+          document.addEventListener('contextmenu', function (event) {
+            var node = event.target;
+            var href = null;
+            while (node && node !== document) {
+              if (node.href) {
+                href = node.href;
+                break;
+              }
+              node = node.parentElement;
+            }
+
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.goldsunPasswords) {
+              window.webkit.messageHandlers.goldsunPasswords.postMessage({
+                kind: 'contextMenuLink',
+                href: href
+              });
+            }
+          }, true);
+
           window.__goldsunFillPassword = function (username, password) {
             var forms = Array.prototype.slice.call(document.forms);
             for (var i = 0; i < forms.length; i += 1) {
@@ -163,7 +197,9 @@ struct WebKitBrowserView: NSViewRepresentable {
         weak var tab: BrowserTabSession?
         weak var downloadStore: DownloadStore?
         weak var passwordStore: PasswordStore?
+        private weak var webView: GoldSunWebView?
         var openURLInNewTab: (URL) -> Void
+        var openURLInNewWindow: (URL) -> Void
         var lastNavigationRequestID: UUID?
 
         private var observations: [NSKeyValueObservation] = []
@@ -174,15 +210,18 @@ struct WebKitBrowserView: NSViewRepresentable {
             tab: BrowserTabSession,
             downloadStore: DownloadStore,
             passwordStore: PasswordStore,
-            openURLInNewTab: @escaping (URL) -> Void
+            openURLInNewTab: @escaping (URL) -> Void,
+            openURLInNewWindow: @escaping (URL) -> Void
         ) {
             self.tab = tab
             self.downloadStore = downloadStore
             self.passwordStore = passwordStore
             self.openURLInNewTab = openURLInNewTab
+            self.openURLInNewWindow = openURLInNewWindow
         }
 
         func attach(to webView: WKWebView) {
+            self.webView = webView as? GoldSunWebView
             observations = [
                 webView.observe(\.title, options: [.initial, .new]) { [weak self] webView, _ in
                     Task { @MainActor in
@@ -469,8 +508,20 @@ struct WebKitBrowserView: NSViewRepresentable {
 
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             guard message.name == Self.passwordMessageHandlerName,
-                  let payload = message.body as? [String: Any],
-                  payload["kind"] as? String == "submit",
+                  let payload = message.body as? [String: Any] else {
+                return
+            }
+
+            if payload["kind"] as? String == "contextMenuLink" {
+                if let href = payload["href"] as? String {
+                    webView?.contextMenuLinkURL = URL(string: href)
+                } else {
+                    webView?.contextMenuLinkURL = nil
+                }
+                return
+            }
+
+            guard payload["kind"] as? String == "submit",
                   let originString = payload["origin"] as? String,
                   let origin = URL(string: originString),
                   let password = payload["password"] as? String else {
@@ -503,6 +554,86 @@ struct WebKitBrowserView: NSViewRepresentable {
 
             return String(array.dropFirst().dropLast())
         }
+
+    }
+}
+
+private final class GoldSunWebView: WKWebView {
+    var contextMenuLinkURL: URL?
+    var openURLInNewTab: ((URL) -> Void)?
+    var openURLInNewWindow: ((URL) -> Void)?
+
+    override func rightMouseDown(with event: NSEvent) {
+        contextMenuLinkURL = nil
+        super.rightMouseDown(with: event)
+    }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let menu = super.menu(for: event) ?? NSMenu()
+
+        guard let contextMenuLinkURL else {
+            return menu
+        }
+
+        removeDefaultOpenLinkItems(from: menu)
+
+        let openInNewTab = NSMenuItem(
+            title: "Open Link in New Tab",
+            action: #selector(openContextLinkInNewTab(_:)),
+            keyEquivalent: ""
+        )
+        openInNewTab.target = self
+        openInNewTab.representedObject = contextMenuLinkURL
+
+        let openInNewWindow = NSMenuItem(
+            title: "Open Link in New Window",
+            action: #selector(openContextLinkInNewWindow(_:)),
+            keyEquivalent: ""
+        )
+        openInNewWindow.target = self
+        openInNewWindow.representedObject = contextMenuLinkURL
+
+        menu.insertItem(openInNewWindow, at: 0)
+        menu.insertItem(openInNewTab, at: 0)
+
+        if menu.items.count > 2,
+           !menu.items[2].isSeparatorItem {
+            menu.insertItem(.separator(), at: 2)
+        }
+
+        return menu
+    }
+
+    @objc private func openContextLinkInNewTab(_ sender: NSMenuItem) {
+        guard let url = sender.representedObject as? URL else {
+            return
+        }
+
+        openURLInNewTab?(url)
+    }
+
+    @objc private func openContextLinkInNewWindow(_ sender: NSMenuItem) {
+        guard let url = sender.representedObject as? URL else {
+            return
+        }
+
+        openURLInNewWindow?(url)
+    }
+
+    private func removeDefaultOpenLinkItems(from menu: NSMenu) {
+        for item in menu.items.reversed() where isDefaultOpenLinkTabOrWindowItem(item) {
+            menu.removeItem(item)
+        }
+
+        while menu.items.first?.isSeparatorItem == true {
+            menu.removeItem(at: 0)
+        }
+    }
+
+    private func isDefaultOpenLinkTabOrWindowItem(_ item: NSMenuItem) -> Bool {
+        let title = item.title.lowercased()
+        return title.contains("open link")
+            && (title.contains("new tab") || title.contains("new window"))
     }
 }
 
