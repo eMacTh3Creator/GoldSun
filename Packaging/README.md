@@ -5,10 +5,10 @@ GoldSun ships as a macOS app bundle plus an installer package that places the ap
 ## Local package
 
 ```bash
-./script/package_release.sh 0.2.18
+./script/package_release.sh 0.2.19
 ```
 
-Artifacts are written to `release/0.2.18/`.
+Artifacts are written to `release/0.2.19/`.
 
 ## Chromium/CEF runtime layout
 
@@ -23,7 +23,7 @@ GoldSun.app/Contents/Frameworks/GoldSun Helper (Plugin).app
 GoldSun.app/Contents/Frameworks/GoldSun Helper (Renderer).app
 ```
 
-All five helper bundles wrap the same `GoldSunCEFHelper` binary; Chromium picks the variant per process type. When the CEF cache is absent (for example on CI today), `bundle_cef.sh` is a no-op and the app ships WebKit-only.
+All five helper bundles wrap the same `GoldSunCEFHelper` binary; Chromium picks the variant per process type. When the CEF cache is absent, `bundle_cef.sh` is a no-op and the app ships WebKit-only. The GitHub Release workflow runs `script/fetch_cef.sh` before packaging, so public release artifacts include the Chromium runtime.
 
 ### Signing order
 
@@ -79,7 +79,7 @@ Then package with notarization enabled:
 ```bash
 export GOLDSUN_NOTARIZE=1
 export GOLDSUN_NOTARY_PROFILE=GoldSunNotaryProfile
-./script/package_release.sh 0.1.0
+./script/package_release.sh 0.2.19
 ```
 
 The script submits and staples the `.pkg` and `.dmg` when notarization is enabled.

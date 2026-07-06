@@ -30,7 +30,7 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Codex Run action wired through `script/build_and_run.sh`
 - Chromium/CEF proof-of-life engine behind an Objective-C++ bridge (`GoldSunCEFBridge`), with a pinned CEF download script and automatic WebKit fallback
 
-GoldSun now hosts a real Chromium browsing surface through CEF when the pinned runtime is fetched locally (see below). Regular `http(s)` pages render in Chromium; internal pages and the start page stay on the WebKit development shim, and the app falls back to WebKit entirely when the CEF runtime is not bundled. Chrome Web Store installation is still not exposed; extension support returns only after the Chromium runtime is production-ready.
+GoldSun now hosts a real Chromium browsing surface through CEF when the pinned runtime is available. Release artifacts fetch and bundle CEF in CI, so regular `http(s)` pages render in Chromium; internal pages and the start page stay on the WebKit development shim, and the app falls back to WebKit entirely when the CEF runtime is not bundled. Chrome Web Store installation is still not exposed; extension support returns only after the Chromium runtime is production-ready.
 
 ## Run
 
@@ -63,13 +63,13 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.18](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.18).
+Download the current prerelease installer from [GoldSun v0.2.19](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.19).
 
 ```bash
-./script/package_release.sh 0.2.18
+./script/package_release.sh 0.2.19
 ```
 
-When the CEF cache is present, packaging bundles the Chromium framework and helper apps into `GoldSun.app` (see `Packaging/README.md`); without it the package is WebKit-only, which is how CI release artifacts are currently built.
+When the CEF cache is present, packaging bundles the Chromium framework and helper apps into `GoldSun.app` (see `Packaging/README.md`). The GitHub Release workflow now fetches the pinned CEF runtime before packaging, so public release artifacts include Chromium.
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
 

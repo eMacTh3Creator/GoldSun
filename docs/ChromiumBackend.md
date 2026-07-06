@@ -4,7 +4,7 @@ GoldSun's intended backend is Chromium. On macOS, the practical embedding route 
 
 Current compatibility target: Chrome Stable `149.0.7827.201` / Chromium revision `1625079`, delivered by pinned CEF `149.0.6+g0d0eeb6+chromium-149.0.7827.201`. (The previously documented `150.0.7871.47` was a beta-channel build number; CEF stable and Chrome Stable for Mac are both on 149 as of 2026-07-06.)
 
-## Implementation status (proof of life in 0.2.13; popups/fullscreen/progress in 0.2.17)
+## Implementation status (proof of life in 0.2.13; popups/fullscreen/progress in 0.2.17; CI CEF packaging in 0.2.19)
 
 Working today:
 
@@ -19,6 +19,7 @@ Working today:
 - `EngineHostView` routes regular `http(s)` pages to Chromium when the runtime is bundled and healthy; internal pages, the start page, and the `engine.forceWebKit` defaults override stay on WebKit.
 - Message pump: CEF's external message pump (`on_schedule_message_pump_work`) drives `cef_do_message_loop_work` on the main run loop, with a 30 Hz safety-net timer in common run-loop modes.
 - `script/bundle_cef.sh` copies the framework and creates the five helper app bundles, signing nested-first (see `Packaging/README.md`).
+- The GitHub Release workflow caches and fetches the pinned CEF runtime before packaging, so published release artifacts include Chromium instead of shipping WebKit-only.
 - Browsing profile persists at `~/Library/Application Support/GoldSun/CEFProfile`.
 
 Hard-won integration notes:
@@ -28,7 +29,9 @@ Hard-won integration notes:
 - Browser creation waits for the host view to be in a window with non-empty bounds.
 - On termination, browsers are force-closed and the loop is pumped briefly before `cef_shutdown()` so the profile flushes cleanly.
 
-Not wired yet (next phases): downloads, permission prompts, renderer-crash recovery UI, password-manager integration, ad blocking on the Chromium path, and CEF in CI/release packaging.
+Not wired yet (next phases): downloads, permission prompts, renderer-crash recovery UI, password-manager integration, and ad blocking on the Chromium path.
+
+Fixed in `0.2.19`: GitHub Release packaging now runs `script/fetch_cef.sh` before `script/package_release.sh`, with an Actions cache for `ThirdParty/CEFCache`, so uploaded `.pkg`, `.dmg`, and `.app.zip` artifacts include the pinned Chromium Embedded Framework and five helper apps.
 
 Fixed in `0.2.18`: an external "open URL" request into an already-running GoldSun (for example `open -a GoldSun <url>`) used to spin up a second app window sharing the same tab model, so a single tab ended up hosted by two independent CEF browser instances (two renderer processes, duplicate title/URL/loading callbacks). The main window scene (`Sources/GoldSun/App/GoldSunApp.swift`) is a singleton `Window` rather than a `WindowGroup`, since GoldSun's only supported multi-window path is the explicit "open in new window" action, which already creates its own independent `BrowserModel`.
 
