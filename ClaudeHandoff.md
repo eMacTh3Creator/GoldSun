@@ -19,7 +19,7 @@ https://github.com/eMacTh3Creator/GoldSun
 Current known release:
 
 ```text
-v0.2.17
+v0.2.18
 ```
 
 GoldSun is a SwiftPM macOS app. There is no Xcode project in the repo. Use SwiftPM and the existing scripts.
@@ -66,7 +66,7 @@ Current Chromium target metadata:
 Sources/GoldSunCore/Models/ChromiumRuntimeVersion.swift
 ```
 
-As of `v0.2.17`:
+As of `v0.2.18`:
 
 ```text
 Chrome Stable 149.0.7827.201
@@ -140,7 +140,7 @@ Do not delete `WebKitBrowserView` immediately. Keep it as a fallback until CEF c
 
 ### Phase 3: Make Google And YouTube Work
 
-Status: DONE in `v0.2.17` for popup routing into tabs, HTML-to-native fullscreen handoff (with chrome hiding), real load progress, cookie/profile persistence, and back/forward navigation. Google serves its standard sign-in flow to the embedded Chromium (verified: real identifier page at accounts.google.com, no embedded-browser block); completing an actual account sign-in requires the owner's credentials and was left to the owner. The safer password-manager credential strategy remains future work.
+Status: DONE in `v0.2.18` for popup routing into tabs, HTML-to-native fullscreen handoff (with chrome hiding), real load progress, cookie/profile persistence, and back/forward navigation. Google serves its standard sign-in flow to the embedded Chromium (verified: real identifier page at accounts.google.com, no embedded-browser block); completing an actual account sign-in requires the owner's credentials and was left to the owner. The safer password-manager credential strategy remains future work.
 
 CEF must handle:
 
