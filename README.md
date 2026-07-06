@@ -63,15 +63,15 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.19](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.19).
+Download the current prerelease installer from [GoldSun v0.2.20](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.20).
 
 ```bash
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
 When the CEF cache is present, packaging bundles the Chromium framework and helper apps into `GoldSun.app` (see `Packaging/README.md`). The GitHub Release workflow now fetches the pinned CEF runtime before packaging, so public release artifacts include Chromium.
 
-The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
+The `.pkg` artifact opens as a versioned `Install GoldSun <version>` installer and installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
 
 ## Chromium path
 

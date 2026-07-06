@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.20
+
+- Rebuilt the macOS installer as a versioned product package so Installer shows `Install GoldSun 0.2.20`, a GoldSun welcome screen, and versioned install details instead of a generic install prompt.
+- Updated packaging, release, and site documentation so future installers generate their visible app name and version from the release number automatically.
+
 ## 0.2.19
 
 - Updated the GitHub Release workflow to cache and fetch the pinned Chromium/CEF runtime before packaging, so published release artifacts bundle the CEF framework and helper apps instead of shipping WebKit-only.

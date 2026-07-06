@@ -19,7 +19,7 @@ https://github.com/eMacTh3Creator/GoldSun
 Current known release:
 
 ```text
-v0.2.19
+v0.2.20
 ```
 
 GoldSun is a SwiftPM macOS app. There is no Xcode project in the repo. Use SwiftPM and the existing scripts.
@@ -66,7 +66,7 @@ Current Chromium target metadata:
 Sources/GoldSunCore/Models/ChromiumRuntimeVersion.swift
 ```
 
-As of `v0.2.19`:
+As of `v0.2.20`:
 
 ```text
 Chrome Stable 149.0.7827.201
@@ -168,7 +168,7 @@ Wire CEF callbacks into GoldSun's native stores/UI:
 
 ### Phase 5: Packaging, Signing, Notarization
 
-Status: PARTLY DONE in `v0.2.19`. GitHub Release packaging now fetches and bundles the pinned CEF runtime, framework, and helper apps. Developer ID signing, notarization, and removing the mock-keychain workaround remain future work.
+Status: PARTLY DONE in `v0.2.20`. GitHub Release packaging now fetches and bundles the pinned CEF runtime, framework, and helper apps. The package is a versioned macOS Installer product with a GoldSun title, welcome screen, readme, and install choice generated from the release version. Developer ID signing, notarization, and removing the mock-keychain workaround remain future work.
 
 CEF needs helper apps/processes in the final `.app` bundle.
 
@@ -230,7 +230,7 @@ Move the current WebKit content-rule blocking into Chromium's request path:
 Use semantic prerelease-style versions already established in the repo:
 
 ```text
-0.2.19 -> 0.2.20 -> 0.2.21
+0.2.20 -> 0.2.21 -> 0.2.22
 ```
 
 For normal fixes, bump patch by one.
@@ -238,13 +238,13 @@ For normal fixes, bump patch by one.
 For the next release, bump the patch version unless the owner asks for a larger version bump. Example:
 
 ```text
-0.2.20
+0.2.21
 ```
 
 When bumping a version, update every active reference:
 
 ```bash
-rg -n "0\\.2\\.19|v0\\.2\\.19|GoldSun-0\\.2\\.19" .
+rg -n "0\\.2\\.20|v0\\.2\\.20|GoldSun-0\\.2\\.20" .
 ```
 
 Usually update:

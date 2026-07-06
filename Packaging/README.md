@@ -5,10 +5,14 @@ GoldSun ships as a macOS app bundle plus an installer package that places the ap
 ## Local package
 
 ```bash
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
-Artifacts are written to `release/0.2.19/`.
+Artifacts are written to `release/0.2.20/`.
+
+## Installer branding
+
+`script/package_release.sh` builds a product package with a generated Installer distribution. The visible Installer title, welcome page, readme page, package choice, and output filename all use the release version passed to the script, for example `Install GoldSun 0.2.20`.
 
 ## Chromium/CEF runtime layout
 
@@ -79,7 +83,7 @@ Then package with notarization enabled:
 ```bash
 export GOLDSUN_NOTARIZE=1
 export GOLDSUN_NOTARY_PROFILE=GoldSunNotaryProfile
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
 The script submits and staples the `.pkg` and `.dmg` when notarization is enabled.

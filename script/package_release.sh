@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.2.19}"
+VERSION="${1:-0.2.20}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
@@ -25,6 +25,8 @@ ENTITLEMENTS="$ROOT_DIR/Packaging/GoldSun.entitlements"
 PASSKEY_ENTITLEMENTS="$ROOT_DIR/Packaging/GoldSun.passkeys.entitlements"
 PKG_ROOT="$BUILD_DIR/pkgroot"
 COMPONENT_PKG="$BUILD_DIR/$APP_NAME-component.pkg"
+INSTALLER_RESOURCES="$BUILD_DIR/installer-resources"
+DISTRIBUTION_XML="$BUILD_DIR/Distribution.xml"
 INSTALLER_PKG="$RELEASE_DIR/$APP_NAME-$VERSION.pkg"
 DMG_PATH="$RELEASE_DIR/$APP_NAME-$VERSION.dmg"
 ZIP_PATH="$RELEASE_DIR/$APP_NAME-$VERSION.app.zip"
@@ -167,10 +169,103 @@ pkgbuild \
   --scripts "$ROOT_DIR/Packaging/pkg-scripts" \
   "$COMPONENT_PKG"
 
+mkdir -p "$INSTALLER_RESOURCES"
+
+cat >"$INSTALLER_RESOURCES/Welcome.html" <<HTML
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body {
+        color: #1f1b14;
+        font: -apple-system-body;
+        margin: 0;
+      }
+
+      h1 {
+        font: -apple-system-title1;
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+
+      p {
+        line-height: 1.45;
+        margin: 0 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Install $APP_NAME $VERSION</h1>
+    <p>This installer will install $APP_NAME $VERSION into the Applications folder.</p>
+    <p>$APP_NAME is a native macOS browser focused on speed, security, and a calm Mac-first browsing experience.</p>
+  </body>
+</html>
+HTML
+
+cat >"$INSTALLER_RESOURCES/ReadMe.html" <<HTML
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body {
+        color: #1f1b14;
+        font: -apple-system-body;
+        margin: 0;
+      }
+
+      h1 {
+        font: -apple-system-title2;
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>$APP_NAME $VERSION</h1>
+    <ul>
+      <li>Installs $APP_NAME.app to /Applications.</li>
+      <li>Includes the pinned Chromium/CEF runtime when it was fetched before packaging.</li>
+      <li>Quit $APP_NAME before installing a replacement version.</li>
+      <li>Prerelease builds may be unsigned or unnotarized unless Developer ID signing is configured.</li>
+    </ul>
+  </body>
+</html>
+HTML
+
+cat >"$DISTRIBUTION_XML" <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+  <title>Install $APP_NAME $VERSION</title>
+  <organization>com.goldsun</organization>
+  <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+  <options customize="never" require-scripts="true" rootVolumeOnly="true"/>
+  <welcome file="Welcome.html" mime-type="text/html"/>
+  <readme file="ReadMe.html" mime-type="text/html"/>
+  <choices-outline>
+    <line choice="$BUNDLE_ID"/>
+  </choices-outline>
+  <choice id="$BUNDLE_ID" title="$APP_NAME $VERSION" description="Install $APP_NAME $VERSION into /Applications.">
+    <pkg-ref id="$BUNDLE_ID"/>
+  </choice>
+  <pkg-ref id="$BUNDLE_ID" version="$VERSION" auth="Root">$(basename "$COMPONENT_PKG")</pkg-ref>
+</installer-gui-script>
+XML
+
 if [[ -n "$INSTALLER_SIGNING_IDENTITY" ]]; then
-  productbuild --sign "$INSTALLER_SIGNING_IDENTITY" --package "$COMPONENT_PKG" "$INSTALLER_PKG"
+  productbuild --sign "$INSTALLER_SIGNING_IDENTITY" --distribution "$DISTRIBUTION_XML" --resources "$INSTALLER_RESOURCES" --package-path "$BUILD_DIR" "$INSTALLER_PKG"
 else
-  productbuild --package "$COMPONENT_PKG" "$INSTALLER_PKG"
+  productbuild --distribution "$DISTRIBUTION_XML" --resources "$INSTALLER_RESOURCES" --package-path "$BUILD_DIR" "$INSTALLER_PKG"
 fi
 
 ditto -c -k --keepParent --noextattr --norsrc "$APP_BUNDLE" "$ZIP_PATH"
