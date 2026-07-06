@@ -3,20 +3,22 @@
 GoldSun's release pipeline produces four artifacts:
 
 - `GoldSun.app`: the macOS app bundle.
-- `GoldSun-<version>.pkg`: an installer package that installs to `/Applications/GoldSun.app`.
+- `GoldSun-<version>.pkg`: a versioned Installer package that installs to `/Applications/GoldSun.app`.
 - `GoldSun-<version>.dmg`: a disk image containing the app bundle.
 - `GoldSun-<version>.app.zip`: a zipped app bundle for GitHub release uploads.
 
 ## Local release
 
 ```bash
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
+
+The package is built from a generated Installer distribution, so the visible title, welcome screen, readme, and package choice identify the app and exact version being installed.
 
 The package installer can be tested locally with:
 
 ```bash
-sudo installer -pkg release/0.2.19/GoldSun-0.2.19.pkg -target /
+sudo installer -pkg release/0.2.20/GoldSun-0.2.20.pkg -target /
 ```
 
 ## Official signing
@@ -26,7 +28,7 @@ Set Developer ID identities before packaging:
 ```bash
 export GOLDSUN_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
 export GOLDSUN_INSTALLER_SIGNING_IDENTITY="Developer ID Installer: Your Name (TEAMID)"
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
 Without those identities, the script creates ad-hoc signed local artifacts only.
@@ -35,7 +37,7 @@ Apple's browser passkey entitlement is restricted. Only enable it for a Develope
 
 ```bash
 export GOLDSUN_ENABLE_PASSKEY_ENTITLEMENT=1
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
 ## Notarization
@@ -43,7 +45,7 @@ export GOLDSUN_ENABLE_PASSKEY_ENTITLEMENT=1
 ```bash
 export GOLDSUN_NOTARIZE=1
 export GOLDSUN_NOTARY_PROFILE=GoldSunNotaryProfile
-./script/package_release.sh 0.2.19
+./script/package_release.sh 0.2.20
 ```
 
 `GoldSunNotaryProfile` must already exist in the keychain via `xcrun notarytool store-credentials`.
@@ -53,8 +55,8 @@ export GOLDSUN_NOTARY_PROFILE=GoldSunNotaryProfile
 Create and push a version tag:
 
 ```bash
-git tag v0.2.19
-git push origin main v0.2.19
+git tag v0.2.20
+git push origin main v0.2.20
 ```
 
 The `Release` workflow tests the package, uploads artifacts, and publishes a prerelease GitHub release.
