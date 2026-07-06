@@ -302,7 +302,7 @@ enum GoldSunStartPage {
               <section class="panel" aria-label="GoldSun start page">
                 <div class="sun" aria-hidden="true"></div>
                 <h1>GoldSun</h1>
-                <form action="https://duckduckgo.com/" method="get">
+                <form action="\(BrowserDestination.startPageSearch.absoluteString)" method="get">
                   <input name="q" type="search" autofocus autocomplete="off" spellcheck="false" placeholder="Search privately or enter a site">
                   <button type="submit">Search</button>
                 </form>

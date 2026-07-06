@@ -443,6 +443,19 @@ struct WebKitBrowserView: NSViewRepresentable {
                 return
             }
 
+            if let query = BrowserDestination.startPageSearchQuery(from: url) {
+                let resolvedURL = AddressResolver.resolvedURL(from: query, searchEngine: currentSearchEngine())
+
+                tab?.load(resolvedURL)
+
+                if BrowserDestination.isInternal(resolvedURL) {
+                    tab?.title = Self.internalTitle(for: resolvedURL)
+                }
+
+                decisionHandler(.cancel)
+                return
+            }
+
             if BrowserDestination.isInternal(url) {
                 tab?.load(url)
                 tab?.title = Self.internalTitle(for: url)
@@ -574,6 +587,11 @@ struct WebKitBrowserView: NSViewRepresentable {
 
             webView.load(URLRequest(url: fallbackURL))
             return true
+        }
+
+        private func currentSearchEngine() -> SearchEngine {
+            let rawValue = UserDefaults.standard.string(forKey: "searchEngine") ?? SearchEngine.duckDuckGo.rawValue
+            return SearchEngine(rawValue: rawValue) ?? .duckDuckGo
         }
 
         private func currentHTTPSUpgradeMode() -> HTTPSUpgradeMode {

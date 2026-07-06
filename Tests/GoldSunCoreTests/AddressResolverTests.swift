@@ -45,6 +45,51 @@ final class AddressResolverTests: XCTestCase {
         )
     }
 
+    func testStartPageSearchQueryExtractsSubmittedText() {
+        let submission = URL(string: "goldsun://search?q=https%3A%2F%2Fwww.youtube.com")!
+
+        XCTAssertEqual(BrowserDestination.startPageSearchQuery(from: submission), "https://www.youtube.com")
+    }
+
+    func testStartPageSearchQueryDecodesFormEncodedSpacesAndPluses() {
+        let spaces = URL(string: "goldsun://search?q=swift+browser+architecture")!
+        let literalPlus = URL(string: "goldsun://search?q=c%2B%2B+tutorial")!
+
+        XCTAssertEqual(BrowserDestination.startPageSearchQuery(from: spaces), "swift browser architecture")
+        XCTAssertEqual(BrowserDestination.startPageSearchQuery(from: literalPlus), "c++ tutorial")
+    }
+
+    func testStartPageSearchQueryIgnoresOtherURLs() {
+        XCTAssertNil(BrowserDestination.startPageSearchQuery(from: BrowserDestination.goldSunStartPage))
+        XCTAssertNil(BrowserDestination.startPageSearchQuery(from: BrowserDestination.bookmarkManager))
+        XCTAssertNil(BrowserDestination.startPageSearchQuery(from: URL(string: "goldsun://search")!))
+        XCTAssertNil(BrowserDestination.startPageSearchQuery(from: URL(string: "https://duckduckgo.com/?q=example")!))
+    }
+
+    func testStartPageSubmissionOfFullURLNavigatesDirectly() {
+        let submission = URL(string: "goldsun://search?q=https%3A%2F%2Fwww.youtube.com")!
+        let query = BrowserDestination.startPageSearchQuery(from: submission)!
+
+        XCTAssertEqual(AddressResolver.resolvedURL(from: query).absoluteString, "https://www.youtube.com")
+    }
+
+    func testStartPageSubmissionOfHostnameNavigatesDirectly() {
+        let submission = URL(string: "goldsun://search?q=youtube.com")!
+        let query = BrowserDestination.startPageSearchQuery(from: submission)!
+
+        XCTAssertEqual(AddressResolver.resolvedURL(from: query).absoluteString, "https://youtube.com")
+    }
+
+    func testStartPageSubmissionOfPlainTextSearchesConfiguredEngine() {
+        let submission = URL(string: "goldsun://search?q=swift%20browser%20architecture")!
+        let query = BrowserDestination.startPageSearchQuery(from: submission)!
+        let url = AddressResolver.resolvedURL(from: query, searchEngine: .google)
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+
+        XCTAssertEqual(components?.host, "www.google.com")
+        XCTAssertEqual(components?.queryItems?.first { $0.name == "q" }?.value, "swift browser architecture")
+    }
+
     func testSearchesPlainLanguageInput() {
         let url = AddressResolver.resolvedURL(from: "swift browser architecture")
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)

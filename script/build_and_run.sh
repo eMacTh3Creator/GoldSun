@@ -5,7 +5,7 @@ MODE="${1:-run}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
-VERSION="${GOLDSUN_VERSION:-0.2.14}"
+VERSION="${GOLDSUN_VERSION:-0.2.15}"
 export MACOSX_DEPLOYMENT_TARGET="$MIN_SYSTEM_VERSION"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

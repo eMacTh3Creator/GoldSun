@@ -5,10 +5,10 @@ GoldSun ships as a macOS app bundle plus an installer package that places the ap
 ## Local package
 
 ```bash
-./script/package_release.sh 0.2.14
+./script/package_release.sh 0.2.15
 ```
 
-Artifacts are written to `release/0.2.14/`.
+Artifacts are written to `release/0.2.15/`.
 
 ## Chromium/CEF runtime layout
 

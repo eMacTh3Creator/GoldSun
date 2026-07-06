@@ -9,7 +9,7 @@ on:
       version:
         description: "Release version"
         required: true
-        default: "0.2.14"
+        default: "0.2.15"
 
 permissions:
   contents: write
@@ -53,7 +53,7 @@ jobs:
           body: |
             GoldSun ${{ steps.version.outputs.value }} prerelease.
 
-            This build packages the native macOS Swift browser shell, persistent tab web views, real right-click link opening in new windows, new-tab link actions, cleaner GoldSun offline start page, browser chrome, built-in bookmark, history, download, and password pages, browser-compatible bookmark import/export, privacy-controlled browsing history, address-bar select-all editing, Keychain-backed password management with native save prompts and browser CSV import/export, macOS default-browser registration metadata, signed-build passkey readiness, native WebKit user-agent identity for the development backend, a default-browser handoff for blocked sign-in flows, YouTube-compatible element fullscreen support, favicon-aware tab bar and bookmarks, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, download management, auto-update checks with installer handoff quitting, and the bundled app icon.
+            This build packages the native macOS Swift browser shell, persistent tab web views, real right-click link opening in new windows, new-tab link actions, cleaner GoldSun offline start page with address-bar-style search that opens typed URLs directly and honors the configured search engine, browser chrome, built-in bookmark, history, download, and password pages, browser-compatible bookmark import/export, privacy-controlled browsing history, address-bar select-all editing, Keychain-backed password management with native save prompts and browser CSV import/export, macOS default-browser registration metadata, signed-build passkey readiness, native WebKit user-agent identity for the development backend, a default-browser handoff for blocked sign-in flows, YouTube-compatible element fullscreen support, favicon-aware tab bar and bookmarks, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, download management, auto-update checks with installer handoff quitting, and the bundled app icon.
 
             The codebase now includes the first Chromium/CEF proof-of-life engine (pinned CEF 149 behind an Objective-C++ bridge with automatic WebKit fallback). This CI artifact is built without the CEF cache, so it ships WebKit-only; local builds after running script/fetch_cef.sh get the Chromium engine. Chrome Web Store install surfaces remain hidden until a real Chromium extension runtime is available.
 

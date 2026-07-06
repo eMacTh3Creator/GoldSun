@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.15
+
+- Fixed the offline start page search box treating everything as a search: submissions now go through the same address resolution as the address bar, so typing `https://www.youtube.com` or `youtube.com` opens the site directly while plain text still searches.
+- Start page searches now use the search engine selected in Settings instead of always using DuckDuckGo.
+
 ## 0.2.14
 
 - Stopped repeated macOS "access files in your Documents folder" prompts for development builds by staging the dev app bundle in `~/Library/Developer/GoldSun/dist` instead of the repo `dist/` folder (TCC re-prompts ad-hoc signed apps inside protected folders on every rebuild). A `dist/GoldSun.app` symlink keeps existing workflows working, and `GOLDSUN_DIST_DIR` overrides the location.
