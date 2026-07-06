@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.14
+
+- Stopped repeated macOS "access files in your Documents folder" prompts for development builds by staging the dev app bundle in `~/Library/Developer/GoldSun/dist` instead of the repo `dist/` folder (TCC re-prompts ad-hoc signed apps inside protected folders on every rebuild). A `dist/GoldSun.app` symlink keeps existing workflows working, and `GOLDSUN_DIST_DIR` overrides the location.
+
 ## 0.2.13
 
 - Added a Chromium Embedded Framework (CEF) proof-of-life engine: regular web pages now render in a real Chromium runtime hosted inside GoldSun's native window when the pinned CEF distribution is fetched locally.

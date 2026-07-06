@@ -19,7 +19,7 @@ https://github.com/eMacTh3Creator/GoldSun
 Current known release:
 
 ```text
-v0.2.13
+v0.2.14
 ```
 
 GoldSun is a SwiftPM macOS app. There is no Xcode project in the repo. Use SwiftPM and the existing scripts.
@@ -66,7 +66,7 @@ Current Chromium target metadata:
 Sources/GoldSunCore/Models/ChromiumRuntimeVersion.swift
 ```
 
-As of `v0.2.13`:
+As of `v0.2.14`:
 
 ```text
 Chrome Stable 149.0.7827.201

@@ -5,11 +5,15 @@ MODE="${1:-run}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
-VERSION="${GOLDSUN_VERSION:-0.2.13}"
+VERSION="${GOLDSUN_VERSION:-0.2.14}"
 export MACOSX_DEPLOYMENT_TARGET="$MIN_SYSTEM_VERSION"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DIST_DIR="$ROOT_DIR/dist"
+# Stage the dev bundle OUTSIDE TCC-protected folders (Documents/Desktop/
+# Downloads). Running the app from inside ~/Documents makes macOS prompt for
+# Documents access, and because ad-hoc signatures change every rebuild, TCC
+# forgets the approval each time. ~/Library is not protected.
+DIST_DIR="${GOLDSUN_DIST_DIR:-$HOME/Library/Developer/GoldSun/dist}"
 APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
@@ -113,6 +117,15 @@ cat >"$INFO_PLIST" <<PLIST
 PLIST
 
 "$ROOT_DIR/script/bundle_cef.sh" "$APP_BUNDLE" "$(swift build --show-bin-path)/GoldSunCEFHelper"
+
+# Convenience symlink so repo-relative dist/GoldSun.app keeps working.
+mkdir -p "$ROOT_DIR/dist"
+if [[ ! -L "$ROOT_DIR/dist/$APP_NAME.app" ]]; then
+  rm -rf "$ROOT_DIR/dist/$APP_NAME.app"
+fi
+ln -sfn "$APP_BUNDLE" "$ROOT_DIR/dist/$APP_NAME.app"
+
+echo "Dev bundle staged at: $APP_BUNDLE"
 
 open_app() {
   /usr/bin/open -n "$APP_BUNDLE"
