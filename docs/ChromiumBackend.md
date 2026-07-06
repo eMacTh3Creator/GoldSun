@@ -30,7 +30,7 @@ Hard-won integration notes:
 
 Not wired yet (next phases): downloads, permission prompts, renderer-crash recovery UI, password-manager integration, ad blocking on the Chromium path, and CEF in CI/release packaging.
 
-Known issue: when two app windows share the same tab model (for example after macOS window restoration opens a second window), each window hosts its own CEF browser for the same tab, so one tab can own two renderer processes and duplicate callbacks.
+Fixed in `0.2.18`: an external "open URL" request into an already-running GoldSun (for example `open -a GoldSun <url>`) used to spin up a second app window sharing the same tab model, so a single tab ended up hosted by two independent CEF browser instances (two renderer processes, duplicate title/URL/loading callbacks). The main window scene (`Sources/GoldSun/App/GoldSunApp.swift`) is a singleton `Window` rather than a `WindowGroup`, since GoldSun's only supported multi-window path is the explicit "open in new window" action, which already creates its own independent `BrowserModel`.
 
 ## Recommended integration
 

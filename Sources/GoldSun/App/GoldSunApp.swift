@@ -16,7 +16,13 @@ struct GoldSunApp: App {
     @AppStorage("adBlockEnabled") private var adBlockEnabled = AdBlockConfiguration.defaults.isEnabled
 
     var body: some Scene {
-        WindowGroup("GoldSun", id: "browser") {
+        // A singleton scene, not WindowGroup: external "open URL" requests
+        // (for example `open -a GoldSun <url>`) otherwise spin up a second
+        // window sharing the same `browserModel`, so the same tab ends up
+        // hosted by two independent CEF browser instances at once. Extra
+        // windows are created deliberately through `BrowserWindowOpener`,
+        // which owns its own separate `BrowserModel`.
+        Window("GoldSun", id: "browser") {
             BrowserWindowView(
                 model: browserModel,
                 bookmarkStore: bookmarkStore,

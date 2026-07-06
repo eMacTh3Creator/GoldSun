@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.18
+
+- Fixed a bug where opening a URL into an already-running GoldSun (for example `open -a GoldSun <url>`, or any external "open URL" request) spun up a second app window sharing the same tab state, so a single tab ended up hosted by two independent CEF Chromium browser instances at once, doubling renderer resource use and firing duplicate title/URL/loading callbacks. The main window scene is now a singleton (`Window` instead of `WindowGroup`); additional windows still open correctly through the existing "open in new window" action, which already used its own independent browser model.
+
 ## 0.2.17
 
 - Routed Chromium popups and `target="_blank"` links into regular GoldSun tabs: the CEF life-span handler intercepts `on_before_popup`, suppresses the native popup window, and opens the target URL as a new tab.

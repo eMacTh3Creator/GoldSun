@@ -63,10 +63,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.17](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.17).
+Download the current prerelease installer from [GoldSun v0.2.18](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.18).
 
 ```bash
-./script/package_release.sh 0.2.17
+./script/package_release.sh 0.2.18
 ```
 
 When the CEF cache is present, packaging bundles the Chromium framework and helper apps into `GoldSun.app` (see `Packaging/README.md`); without it the package is WebKit-only, which is how CI release artifacts are currently built.
