@@ -86,6 +86,13 @@ struct GoldSunApp: App {
 
                 Divider()
 
+                Button("Open Page in Default Browser") {
+                    browserModel.openSelectedPageInDefaultBrowser()
+                }
+                .disabled(!canOpenCurrentPageExternally)
+
+                Divider()
+
                 Button("Close Tab") {
                     browserModel.closeSelectedTab()
                 }
@@ -201,6 +208,14 @@ struct GoldSunApp: App {
         }
 
         return !bookmarkStore.isBookmarked(url)
+    }
+
+    private var canOpenCurrentPageExternally: Bool {
+        guard let url = browserModel.selectedTab?.url else {
+            return false
+        }
+
+        return !BrowserDestination.isInternal(url)
     }
 }
 

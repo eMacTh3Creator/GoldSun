@@ -15,8 +15,9 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - Downloads manager with link saving, progress, open, reveal, cancel, retry, and clear actions
 - Keychain-backed password manager with browser CSV import/export, exact-origin autofill, submitted-login capture, and native save prompts
 - macOS browser registration for default-browser selection plus signed-build passkey entitlement wiring
-- AppKit bridge for an embedded development web view
+- AppKit bridge for an embedded development web view that uses the system WebKit user agent
 - YouTube-compatible element fullscreen support in the WebKit development backend
+- Default-browser handoff for sites that block embedded WebKit sign-in flows
 - Built-in ad blocker preferences with filter-list options
 - Bundled macOS app icon for Dock, Finder, and Applications
 - Auto updater that checks GitHub releases, downloads the installer, starts the macOS install flow, and quits GoldSun before replacement
@@ -28,7 +29,7 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - URL/search normalization with tests
 - Codex Run action wired through `script/build_and_run.sh`
 
-The app is runnable today with a WebKit development shim that advertises the current Chrome stable compatibility target for stricter sites like Gmail. Chrome Web Store installation is not exposed in the current app because the WebKit backend cannot run Chrome extensions; extension support should return only after the Chromium runtime exists.
+The app is runnable today with a WebKit development shim that uses Apple's native WebKit identity instead of pretending to be Chrome. Google account sign-in may still be blocked by Google's embedded-webview policy until the real Chromium runtime lands, so Chrome Web Store installation is not exposed in the current app; extension support should return only after the Chromium runtime exists.
 
 ## Run
 
@@ -54,10 +55,10 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.11](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.11).
+Download the current prerelease installer from [GoldSun v0.2.12](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.12).
 
 ```bash
-./script/package_release.sh 0.2.11
+./script/package_release.sh 0.2.12
 ```
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.

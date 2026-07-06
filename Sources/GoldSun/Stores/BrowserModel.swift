@@ -1,3 +1,4 @@
+import AppKit
 import Combine
 import Foundation
 import GoldSunCore
@@ -146,6 +147,15 @@ final class BrowserModel: ObservableObject {
 
     func stopLoading() {
         selectedTab?.request(.stopLoading)
+    }
+
+    func openSelectedPageInDefaultBrowser() {
+        guard let url = selectedTab?.url,
+              !BrowserDestination.isInternal(url) else {
+            return
+        }
+
+        NSWorkspace.shared.open(url)
     }
 
     private func observe(_ tab: BrowserTabSession) {

@@ -78,10 +78,10 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertEqual(BrowserHistoryPreferenceKey.isEnabled, "history.isEnabled")
     }
 
-    func testChromiumCompatibilityTargetUsesCurrentStableMajorUserAgent() {
-        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodVersion, "150.0.7871.46")
+    func testChromiumCompatibilityTargetTracksStableMacRelease() {
+        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodVersion, "150.0.7871.47")
         XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodRevision, "1639810")
-        XCTAssertTrue(ChromiumRuntimeVersion.macChromeCompatibleUserAgent.contains("Chrome/150.0.0.0"))
+        XCTAssertEqual(ChromiumRuntimeVersion.majorVersion, "150")
         XCTAssertEqual(WebBrowserCapability.passkeyEntitlement, "com.apple.developer.web-browser.public-key-credential")
     }
 

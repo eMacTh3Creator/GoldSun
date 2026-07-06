@@ -27,13 +27,13 @@
           <h1>GoldSun</h1>
           <p>A stripped-down Mac browser built for speed, security, and a calmer native feel.</p>
           <div class="actions">
-            <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases/download/v0.2.11/GoldSun-0.2.11.pkg">Download</a>
+            <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases/download/v0.2.12/GoldSun-0.2.12.pkg">Download</a>
             <a class="button secondary" href="https://github.com/eMacTh3Creator/GoldSun">View Source</a>
           </div>
           <div class="hero-points" aria-label="GoldSun priorities">
             <span>Native Swift UI</span>
             <span>HTTPS first</span>
-            <span>Chrome 150 target</span>
+            <span>Native WebKit UA</span>
           </div>
         </div>
       </section>
@@ -69,16 +69,16 @@
         </div>
         <div class="feature">
           <h2>Polished where it counts</h2>
-          <p>Version 0.2.11 restores video fullscreen support for sites like YouTube while keeping the speed, privacy, and Gmail compatibility polish.</p>
+          <p>Version 0.2.12 removes Chrome impersonation from the WebKit backend and adds a default-browser handoff for blocked sign-in flows.</p>
         </div>
       </section>
 
       <section id="release" class="release">
         <div>
-          <h2>Version 0.2.11</h2>
-          <p>The prerelease package installs GoldSun into Applications with a Dock/Finder icon, the refreshed mountain start page, native bookmarks with browser import/export, built-in bookmark, history, download, and password pages, Keychain-backed password storage with save prompts, default-browser registration metadata, signed-build passkey readiness, top tab bar browsing, YouTube-compatible fullscreen video, a downloads popover, auto update checks that quit GoldSun before installation, and security-first defaults. Chrome Web Store installation controls are hidden until a real Chromium extension runtime is available. It is unsigned until Developer ID signing and notarization are configured.</p>
+          <h2>Version 0.2.12</h2>
+          <p>The prerelease package installs GoldSun into Applications with a Dock/Finder icon, the refreshed mountain start page, native bookmarks with browser import/export, built-in bookmark, history, download, and password pages, Keychain-backed password storage with save prompts, default-browser registration metadata, signed-build passkey readiness, top tab bar browsing, native WebKit user-agent identity, YouTube-compatible fullscreen video, a default-browser handoff for sites that block embedded sign-in, a downloads popover, auto update checks that quit GoldSun before installation, and security-first defaults. Chrome Web Store installation controls are hidden until a real Chromium extension runtime is available. It is unsigned until Developer ID signing and notarization are configured.</p>
         </div>
-        <pre><code>./script/package_release.sh 0.2.11</code></pre>
+        <pre><code>./script/package_release.sh 0.2.12</code></pre>
       </section>
     </main>
 

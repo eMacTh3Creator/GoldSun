@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.12
+
+- Removed the Chrome-style user-agent override from the WebKit development backend so GoldSun no longer presents a mismatched Chrome identity to Google sign-in.
+- Added a Navigation menu action to open the current page in the Mac default browser when a site blocks embedded WebKit sign-in.
+- Updated the Chromium backend target record to Chrome Stable `150.0.7871.47` for macOS while keeping Chrome identity limited to the future Chromium runtime.
+
 ## 0.2.11
 
 - Enabled WebKit's element fullscreen support so video sites such as YouTube can enter fullscreen from the embedded browser view.

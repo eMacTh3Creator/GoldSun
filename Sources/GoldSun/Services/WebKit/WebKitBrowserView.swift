@@ -27,7 +27,6 @@ struct WebKitBrowserView: NSViewRepresentable {
         configurePasswordManager(for: configuration, coordinator: context.coordinator)
 
         let webView = GoldSunWebView(frame: .zero, configuration: configuration)
-        webView.customUserAgent = ChromiumRuntimeVersion.macChromeCompatibleUserAgent
         webView.openURLInNewTab = openURLInNewTab
         webView.openURLInNewWindow = openURLInNewWindow
         webView.navigationDelegate = context.coordinator

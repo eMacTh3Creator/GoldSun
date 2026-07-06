@@ -9,7 +9,7 @@ on:
       version:
         description: "Release version"
         required: true
-        default: "0.2.11"
+        default: "0.2.12"
 
 permissions:
   contents: write
@@ -53,7 +53,7 @@ jobs:
           body: |
             GoldSun ${{ steps.version.outputs.value }} prerelease.
 
-            This build packages the native macOS Swift browser shell, persistent tab web views, real right-click link opening in new windows, new-tab link actions, cleaner GoldSun offline start page, browser chrome, built-in bookmark, history, download, and password pages, browser-compatible bookmark import/export, privacy-controlled browsing history, address-bar select-all editing, Keychain-backed password management with native save prompts and browser CSV import/export, macOS default-browser registration metadata, signed-build passkey readiness, current Chrome stable compatibility targeting for strict sites such as Gmail, YouTube-compatible element fullscreen support, favicon-aware tab bar and bookmarks, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, download management, auto-update checks with installer handoff quitting, and the bundled app icon. Chrome Web Store install surfaces are intentionally hidden until a real Chromium extension runtime is available.
+            This build packages the native macOS Swift browser shell, persistent tab web views, real right-click link opening in new windows, new-tab link actions, cleaner GoldSun offline start page, browser chrome, built-in bookmark, history, download, and password pages, browser-compatible bookmark import/export, privacy-controlled browsing history, address-bar select-all editing, Keychain-backed password management with native save prompts and browser CSV import/export, macOS default-browser registration metadata, signed-build passkey readiness, native WebKit user-agent identity for the development backend, current Chrome stable tracking for the future Chromium runtime, a default-browser handoff for blocked sign-in flows, YouTube-compatible element fullscreen support, favicon-aware tab bar and bookmarks, built-in ad blocker preferences, WebKit content-rule blocking, HTTPS-first navigation, tracker-parameter cleanup, bookmark management, download management, auto-update checks with installer handoff quitting, and the bundled app icon. Chrome Web Store install surfaces are intentionally hidden until a real Chromium extension runtime is available.
 
             These artifacts are unsigned and not notarized yet. macOS Gatekeeper may warn or block installation until Developer ID signing and notarization are configured.
           files: |
