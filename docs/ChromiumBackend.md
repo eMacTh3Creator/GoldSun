@@ -4,7 +4,7 @@ GoldSun's intended backend is Chromium. On macOS, the practical embedding route 
 
 Current compatibility target: Chrome Stable `149.0.7827.201` / Chromium revision `1625079`, delivered by pinned CEF `149.0.6+g0d0eeb6+chromium-149.0.7827.201`. (The previously documented `150.0.7871.47` was a beta-channel build number; CEF stable and Chrome Stable for Mac are both on 149 as of 2026-07-06.)
 
-## Implementation status (proof of life shipped in 0.2.13)
+## Implementation status (proof of life in 0.2.13; popups/fullscreen/progress in 0.2.17)
 
 Working today:
 
@@ -12,7 +12,10 @@ Working today:
 - `GoldSunCEFBridge` (Objective-C++ SwiftPM target) owns the CEF lifecycle. It compiles the real integration only when the CEF cache is present (`__has_include`); otherwise it builds a stub and the app is WebKit-only, which keeps CI green without the 120 MB download.
 - The framework is loaded with `dlopen` and the C API is resolved with `dlsym` (no libcef link-time dependency, no `libcef_dll_wrapper` build). The API hash is verified against the compiled headers at startup.
 - `GSCEFBrowserHostView` hosts one windowed CEF browser per tab as a child `NSView`; `parent_view` forces Alloy runtime style, so no Chrome UI is transplanted.
-- `ChromiumBrowserView` (SwiftUI `NSViewRepresentable`) mirrors `WebKitBrowserView` against the same `BrowserTabSession` contract: navigation requests, back/forward/reload/stop, and title/URL/loading-state callbacks.
+- `ChromiumBrowserView` (SwiftUI `NSViewRepresentable`) mirrors `WebKitBrowserView` against the same `BrowserTabSession` contract: navigation requests, back/forward/reload/stop, title/URL/loading-state callbacks, and real load progress from `on_loading_progress_change`.
+- Popups and `target="_blank"` links route into regular GoldSun tabs: the life-span handler's `on_before_popup` returns 1 to suppress the native popup window and forwards the target URL through the host-view delegate to `BrowserModel.open(_:inNewTab:)`. Scripted about:blank popups are suppressed without opening a tab; hosting scriptable child windows is future work.
+- HTML fullscreen hands off to native macOS fullscreen: `on_fullscreen_mode_change` drives `NSWindow.toggleFullScreen` and a `BrowserTabSession.isContentFullscreen` flag hides the toolbar/tab bar so the content fills the screen (Alloy style leaves the window transition to the client). Exiting macOS fullscreen directly calls `cef_browser_host_t::exit_fullscreen` so the page's fullscreen state stays in sync.
+- Google serves its standard account sign-in flow to the embedded runtime (verified against accounts.google.com: real GlifWebSignIn identifier page, no embedded-browser block), and cookies/profile state persist across relaunches.
 - `EngineHostView` routes regular `http(s)` pages to Chromium when the runtime is bundled and healthy; internal pages, the start page, and the `engine.forceWebKit` defaults override stay on WebKit.
 - Message pump: CEF's external message pump (`on_schedule_message_pump_work`) drives `cef_do_message_loop_work` on the main run loop, with a 30 Hz safety-net timer in common run-loop modes.
 - `script/bundle_cef.sh` copies the framework and creates the five helper app bundles, signing nested-first (see `Packaging/README.md`).
@@ -25,7 +28,9 @@ Hard-won integration notes:
 - Browser creation waits for the host view to be in a window with non-empty bounds.
 - On termination, browsers are force-closed and the loop is pumped briefly before `cef_shutdown()` so the profile flushes cleanly.
 
-Not wired yet (next phases): downloads, popup routing into tabs, permission prompts, fullscreen handoff, renderer-crash recovery UI, password-manager integration, ad blocking on the Chromium path, and CEF in CI/release packaging.
+Not wired yet (next phases): downloads, permission prompts, renderer-crash recovery UI, password-manager integration, ad blocking on the Chromium path, and CEF in CI/release packaging.
+
+Known issue: when two app windows share the same tab model (for example after macOS window restoration opens a second window), each window hosts its own CEF browser for the same tab, so one tab can own two renderer processes and duplicate callbacks.
 
 ## Recommended integration
 

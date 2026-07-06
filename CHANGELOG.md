@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.17
+
+- Routed Chromium popups and `target="_blank"` links into regular GoldSun tabs: the CEF life-span handler intercepts `on_before_popup`, suppresses the native popup window, and opens the target URL as a new tab.
+- Wired HTML fullscreen to native macOS fullscreen for the embedded Chromium engine: entering video fullscreen (for example the YouTube player) takes the window fullscreen and hides the browser chrome, leaving it restores both, and exiting macOS fullscreen directly also tells the page to leave HTML fullscreen so player state stays in sync.
+- Replaced the placeholder Chromium loading progress with real `on_loading_progress_change` values so the address-bar progress bar reflects actual page load progress.
+- Verified Google now serves its standard account sign-in flow to the embedded Chromium runtime (no "browser may not be secure" block), and that cookies and profile state persist across app relaunches in the Chromium profile directory.
+
 ## 0.2.16
 
 - Fixed searches with a literal `+` (for example `c++ tutorial`) being sent to DuckDuckGo/Google with the `+` silently turned into a space, since query strings decode `+` as a space; the search URL builder now percent-encodes a literal `+` as `%2B` so it survives.

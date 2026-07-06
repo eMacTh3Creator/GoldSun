@@ -13,6 +13,18 @@ NS_ASSUME_NONNULL_BEGIN
     didUpdateLoadingState:(BOOL)isLoading
                 canGoBack:(BOOL)canGoBack
              canGoForward:(BOOL)canGoForward;
+
+/// Overall page load progress in the range 0.0–1.0.
+- (void)cefBrowserHostView:(GSCEFBrowserHostView *)view didUpdateLoadingProgress:(double)progress;
+
+/// A page requested a popup/new window (window.open, target=_blank). The
+/// popup itself is suppressed; the host should open |url| in a GoldSun tab.
+- (void)cefBrowserHostView:(GSCEFBrowserHostView *)view didRequestPopupWithURL:(NSURL *)url;
+
+/// Page content (for example a video player) toggled HTML fullscreen. With
+/// the Alloy runtime CEF only resizes the content; the host is responsible
+/// for the native window fullscreen transition.
+- (void)cefBrowserHostView:(GSCEFBrowserHostView *)view didChangeContentFullscreen:(BOOL)fullscreen;
 @end
 
 /// Owns the CEF process-wide lifecycle for the browser process.
@@ -46,6 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)goForward;
 - (void)reload;
 - (void)stopLoading;
+
+/// Asks the page to leave HTML fullscreen (used when the user exits native
+/// fullscreen directly so the page's fullscreen state stays in sync).
+- (void)exitContentFullscreen;
 
 /// Closes the hosted browser. Call when the owning tab is torn down.
 - (void)tearDown;

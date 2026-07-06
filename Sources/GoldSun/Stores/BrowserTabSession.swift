@@ -14,6 +14,9 @@ final class BrowserTabSession: ObservableObject, Identifiable {
     @Published var canGoForward: Bool
     @Published var navigationRequest: BrowserNavigationRequest
     @Published var pendingAction: BrowserAction?
+    /// True while page content (for example a YouTube video) is in HTML
+    /// fullscreen; the window chrome hides so the content fills the screen.
+    @Published var isContentFullscreen: Bool
     var nativeBackURL: URL?
 
     init(
@@ -30,6 +33,7 @@ final class BrowserTabSession: ObservableObject, Identifiable {
         estimatedProgress = 0
         canGoBack = false
         canGoForward = false
+        isContentFullscreen = false
         navigationRequest = BrowserNavigationRequest(url: url)
     }
 

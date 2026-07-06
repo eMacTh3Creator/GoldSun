@@ -25,6 +25,7 @@
 #include "include/capi/cef_command_line_capi.h"
 #include "include/capi/cef_display_handler_capi.h"
 #include "include/capi/cef_frame_capi.h"
+#include "include/capi/cef_life_span_handler_capi.h"
 #include "include/capi/cef_load_handler_capi.h"
 #include "include/cef_api_hash.h"
 #include "include/cef_application_mac.h"
@@ -193,11 +194,24 @@ struct GSLoadHandler {
     }
 };
 
+struct GSLifeSpanHandler {
+    cef_life_span_handler_t cef{};
+    std::atomic<int> refct{1};
+    void *proxyRetained = nullptr;
+
+    ~GSLifeSpanHandler() {
+        if (proxyRetained) {
+            CFBridgingRelease(proxyRetained);
+        }
+    }
+};
+
 struct GSClient {
     cef_client_t cef{};
     std::atomic<int> refct{1};
     GSDisplayHandler *display = nullptr;
     GSLoadHandler *load = nullptr;
+    GSLifeSpanHandler *lifeSpan = nullptr;
 
     ~GSClient() {
         if (display) {
@@ -205,6 +219,9 @@ struct GSClient {
         }
         if (load) {
             load->cef.base.release(&load->cef.base);
+        }
+        if (lifeSpan) {
+            lifeSpan->cef.base.release(&lifeSpan->cef.base);
         }
     }
 };
@@ -260,6 +277,57 @@ void CEF_CALLBACK GSOnLoadingStateChange(cef_load_handler_t *self,
     GSReleaseArg(&browser->base);
 }
 
+void CEF_CALLBACK GSOnLoadingProgressChange(cef_display_handler_t *self,
+                                            cef_browser_t *browser,
+                                            double progress) {
+    auto *handler = reinterpret_cast<GSDisplayHandler *>(self);
+    GSCEFBrowserHostView *view = GSProxyFor(handler->proxyRetained).view;
+    [view.delegate cefBrowserHostView:view didUpdateLoadingProgress:progress];
+    GSReleaseArg(&browser->base);
+}
+
+void CEF_CALLBACK GSOnFullscreenModeChange(cef_display_handler_t *self,
+                                           cef_browser_t *browser,
+                                           int fullscreen) {
+    auto *handler = reinterpret_cast<GSDisplayHandler *>(self);
+    GSCEFBrowserHostView *view = GSProxyFor(handler->proxyRetained).view;
+    [view.delegate cefBrowserHostView:view didChangeContentFullscreen:fullscreen != 0];
+    GSReleaseArg(&browser->base);
+}
+
+// Suppresses CEF's own popup window and hands the target URL to the host so
+// it opens as a regular GoldSun tab. Returning 1 cancels popup creation, so
+// the inout |client|/|extra_info| and the window/browser settings are left
+// untouched. Popups without a target URL (scripted about:blank windows) are
+// still suppressed; hosting scriptable child windows is out of scope here.
+int CEF_CALLBACK GSOnBeforePopup(cef_life_span_handler_t *self,
+                                 cef_browser_t *browser,
+                                 cef_frame_t *frame,
+                                 int popup_id,
+                                 const cef_string_t *target_url,
+                                 const cef_string_t *target_frame_name,
+                                 cef_window_open_disposition_t target_disposition,
+                                 int user_gesture,
+                                 const cef_popup_features_t *popupFeatures,
+                                 cef_window_info_t *windowInfo,
+                                 cef_client_t **client,
+                                 cef_browser_settings_t *settings,
+                                 cef_dictionary_value_t **extra_info,
+                                 int *no_javascript_access) {
+    auto *handler = reinterpret_cast<GSLifeSpanHandler *>(self);
+    NSString *urlString = GSStringFromCefString(target_url);
+    NSURL *url = urlString.length > 0 ? [NSURL URLWithString:urlString] : nil;
+
+    if (url) {
+        GSCEFBrowserHostView *view = GSProxyFor(handler->proxyRetained).view;
+        [view.delegate cefBrowserHostView:view didRequestPopupWithURL:url];
+    }
+
+    GSReleaseArg(frame ? &frame->base : nullptr);
+    GSReleaseArg(&browser->base);
+    return 1;
+}
+
 void CEF_CALLBACK GSOnBeforeCommandLineProcessing(cef_app_t *self,
                                                   const cef_string_t *process_type,
                                                   cef_command_line_t *command_line) {
@@ -312,6 +380,12 @@ cef_load_handler_t *CEF_CALLBACK GSGetLoadHandler(cef_client_t *self) {
     return &client->load->cef;
 }
 
+cef_life_span_handler_t *CEF_CALLBACK GSGetLifeSpanHandler(cef_client_t *self) {
+    auto *client = reinterpret_cast<GSClient *>(self);
+    client->lifeSpan->cef.base.add_ref(&client->lifeSpan->cef.base);
+    return &client->lifeSpan->cef;
+}
+
 // Creates a client (refct 1, ownership passes to CEF at browser creation).
 GSClient *GSMakeClient(GSCEFBrowserHostView *view) {
     GSCEFViewProxy *proxy = [GSCEFViewProxy new];
@@ -321,6 +395,8 @@ GSClient *GSMakeClient(GSCEFBrowserHostView *view) {
     GSInitBase<GSDisplayHandler>(&display->cef);
     display->cef.on_title_change = GSOnTitleChange;
     display->cef.on_address_change = GSOnAddressChange;
+    display->cef.on_loading_progress_change = GSOnLoadingProgressChange;
+    display->cef.on_fullscreen_mode_change = GSOnFullscreenModeChange;
     display->proxyRetained = (void *)CFBridgingRetain(proxy);
 
     auto *load = new GSLoadHandler();
@@ -328,12 +404,19 @@ GSClient *GSMakeClient(GSCEFBrowserHostView *view) {
     load->cef.on_loading_state_change = GSOnLoadingStateChange;
     load->proxyRetained = (void *)CFBridgingRetain(proxy);
 
+    auto *lifeSpan = new GSLifeSpanHandler();
+    GSInitBase<GSLifeSpanHandler>(&lifeSpan->cef);
+    lifeSpan->cef.on_before_popup = GSOnBeforePopup;
+    lifeSpan->proxyRetained = (void *)CFBridgingRetain(proxy);
+
     auto *client = new GSClient();
     GSInitBase<GSClient>(&client->cef);
     client->cef.get_display_handler = GSGetDisplayHandler;
     client->cef.get_load_handler = GSGetLoadHandler;
+    client->cef.get_life_span_handler = GSGetLifeSpanHandler;
     client->display = display;
     client->load = load;
+    client->lifeSpan = lifeSpan;
     return client;
 }
 
@@ -683,6 +766,18 @@ void GSInstallCefAppProtocolSupport(void) {
     }
 }
 
+- (void)exitContentFullscreen {
+    if (!_browser) {
+        return;
+    }
+
+    cef_browser_host_t *host = _browser->get_host(_browser);
+    if (host) {
+        host->exit_fullscreen(host, 0);
+        host->base.release(&host->base);
+    }
+}
+
 - (void)tearDown {
     if (!_browser) {
         return;
@@ -746,6 +841,9 @@ void GSInstallCefAppProtocolSupport(void) {
 }
 
 - (void)stopLoading {
+}
+
+- (void)exitContentFullscreen {
 }
 
 - (void)tearDown {

@@ -13,23 +13,27 @@ struct BrowserWindowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            BrowserToolbar(
-                model: model,
-                bookmarkStore: bookmarkStore,
-                updateStore: updateStore,
-                downloadStore: downloadStore,
-                passwordStore: passwordStore
-            )
+            // While page content (for example YouTube video) is in HTML
+            // fullscreen, the chrome hides so the content fills the screen.
+            if !isContentFullscreen {
+                BrowserToolbar(
+                    model: model,
+                    bookmarkStore: bookmarkStore,
+                    updateStore: updateStore,
+                    downloadStore: downloadStore,
+                    passwordStore: passwordStore
+                )
 
-            Divider()
-            TabBarView(model: model)
-
-            if showBookmarkBar {
                 Divider()
-                BookmarkBarView(model: model, bookmarkStore: bookmarkStore)
-            }
+                TabBarView(model: model)
 
-            Divider()
+                if showBookmarkBar {
+                    Divider()
+                    BookmarkBarView(model: model, bookmarkStore: bookmarkStore)
+                }
+
+                Divider()
+            }
 
             ZStack {
                 if model.tabs.isEmpty {
@@ -72,6 +76,10 @@ struct BrowserWindowView: View {
                 }
             )
         }
+    }
+
+    private var isContentFullscreen: Bool {
+        model.selectedTab?.isContentFullscreen == true
     }
 
     private var passwordPromptBinding: Binding<PasswordSavePrompt?> {

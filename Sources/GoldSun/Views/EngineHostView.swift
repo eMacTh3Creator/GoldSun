@@ -12,7 +12,13 @@ struct EngineHostView: View {
 
     var body: some View {
         if shouldUseChromium {
-            ChromiumBrowserView(tab: tab, historyStore: historyStore)
+            ChromiumBrowserView(
+                tab: tab,
+                historyStore: historyStore,
+                openURLInNewTab: { url in
+                    model.open(url, inNewTab: true)
+                }
+            )
         } else {
             WebKitBrowserView(
                 tab: tab,
