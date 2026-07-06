@@ -1,5 +1,6 @@
 .DS_Store
 .build/
+ThirdParty/CEFCache/
 .swiftpm/
 DerivedData/
 dist/

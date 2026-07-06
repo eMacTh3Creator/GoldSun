@@ -19,7 +19,7 @@ https://github.com/eMacTh3Creator/GoldSun
 Current known release:
 
 ```text
-v0.2.12
+v0.2.13
 ```
 
 GoldSun is a SwiftPM macOS app. There is no Xcode project in the repo. Use SwiftPM and the existing scripts.
@@ -66,11 +66,12 @@ Current Chromium target metadata:
 Sources/GoldSunCore/Models/ChromiumRuntimeVersion.swift
 ```
 
-As of `v0.2.12`:
+As of `v0.2.13`:
 
 ```text
-Chrome Stable 150.0.7871.47
-Chromium revision 1639810
+Chrome Stable 149.0.7827.201
+Chromium revision 1625079
+CEF 149.0.6+g0d0eeb6+chromium-149.0.7827.201 (pinned in script/fetch_cef.sh)
 ```
 
 Before choosing a CEF build, verify the current target from official Chromium/Chrome sources and update the constants/tests/docs together.
@@ -84,6 +85,8 @@ The SwiftUI layer should not know about CEF types directly. Put CEF behind a sma
 ## Recommended Work Plan
 
 ### Phase 1: CEF Proof Of Life
+
+Status: DONE in `v0.2.13` (with the start of Phase 2's adapter contract). See "Implementation status" in `docs/ChromiumBackend.md` for what exists and the integration gotchas (SwiftUI `NSPrincipalClass`, mock keychain, message pump).
 
 Create a minimal CEF host that can load one page inside a native macOS `NSView`.
 

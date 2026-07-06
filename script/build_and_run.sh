@@ -5,7 +5,7 @@ MODE="${1:-run}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
-VERSION="${GOLDSUN_VERSION:-0.2.12}"
+VERSION="${GOLDSUN_VERSION:-0.2.13}"
 export MACOSX_DEPLOYMENT_TARGET="$MIN_SYSTEM_VERSION"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -111,6 +111,8 @@ cat >"$INFO_PLIST" <<PLIST
 </dict>
 </plist>
 PLIST
+
+"$ROOT_DIR/script/bundle_cef.sh" "$APP_BUNDLE" "$(swift build --show-bin-path)/GoldSunCEFHelper"
 
 open_app() {
   /usr/bin/open -n "$APP_BUNDLE"

@@ -28,15 +28,23 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - GitHub Pages-ready static site in `docs/`
 - URL/search normalization with tests
 - Codex Run action wired through `script/build_and_run.sh`
+- Chromium/CEF proof-of-life engine behind an Objective-C++ bridge (`GoldSunCEFBridge`), with a pinned CEF download script and automatic WebKit fallback
 
-The app is runnable today with a WebKit development shim that uses Apple's native WebKit identity instead of pretending to be Chrome. Google account sign-in may still be blocked by Google's embedded-webview policy until the real Chromium runtime lands, so Chrome Web Store installation is not exposed in the current app; extension support should return only after the Chromium runtime exists.
+GoldSun now hosts a real Chromium browsing surface through CEF when the pinned runtime is fetched locally (see below). Regular `http(s)` pages render in Chromium; internal pages and the start page stay on the WebKit development shim, and the app falls back to WebKit entirely when the CEF runtime is not bundled. Chrome Web Store installation is still not exposed; extension support returns only after the Chromium runtime is production-ready.
 
 ## Run
 
 Requires Xcode or Command Line Tools with a Swift compiler and macOS SDK from the same Xcode release.
 
 ```bash
+./script/fetch_cef.sh   # one-time: download the pinned Chromium/CEF runtime (~120 MB)
 ./script/build_and_run.sh
+```
+
+`fetch_cef.sh` verifies a pinned SHA-256 and unpacks into `ThirdParty/CEFCache/` (git-ignored). Skipping it still builds and runs GoldSun with the WebKit shim only. To force the WebKit shim even when CEF is bundled:
+
+```bash
+defaults write com.goldsun.browser engine.forceWebKit -bool YES
 ```
 
 Useful modes:
@@ -55,11 +63,13 @@ swift test
 
 ## Package
 
-Download the current prerelease installer from [GoldSun v0.2.12](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.12).
+Download the current prerelease installer from [GoldSun v0.2.13](https://github.com/eMacTh3Creator/GoldSun/releases/tag/v0.2.13).
 
 ```bash
-./script/package_release.sh 0.2.12
+./script/package_release.sh 0.2.13
 ```
+
+When the CEF cache is present, packaging bundles the Chromium framework and helper apps into `GoldSun.app` (see `Packaging/README.md`); without it the package is WebKit-only, which is how CI release artifacts are currently built.
 
 The `.pkg` artifact installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
 

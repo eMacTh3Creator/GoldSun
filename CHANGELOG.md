@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.13
+
+- Added a Chromium Embedded Framework (CEF) proof-of-life engine: regular web pages now render in a real Chromium runtime hosted inside GoldSun's native window when the pinned CEF distribution is fetched locally.
+- Added `script/fetch_cef.sh`, which downloads CEF `149.0.6+g0d0eeb6+chromium-149.0.7827.201` with SHA-256 verification into a git-ignored local cache.
+- Added the `GoldSunCEFBridge` Objective-C++ target (dlopen/dlsym C API bridge, external message pump, title/URL/loading callbacks) and the `GoldSunCEFHelper` process executable.
+- Added `script/bundle_cef.sh` so local builds bundle the Chromium framework plus the five helper apps with correct nested code signing; builds and CI without the CEF cache stay WebKit-only automatically.
+- Kept the WebKit development shim as an automatic fallback and behind the `engine.forceWebKit` defaults override; internal pages and the start page still use it.
+- Ran the embedded Chromium with the mock keychain so ad-hoc prerelease builds never trigger macOS Keychain password prompts for "Chromium Safe Storage".
+- Corrected the Chromium compatibility target to the actual Chrome Stable for Mac, `149.0.7827.201` (revision `1625079`); the previous `150.0.7871.47` record was a beta-channel build number.
+- Added CEF packaging/signing documentation covering helper bundles, entitlements, signing order, and the notarization plan.
+
 ## 0.2.12
 
 - Removed the Chrome-style user-agent override from the WebKit development backend so GoldSun no longer presents a mismatched Chrome identity to Google sign-in.

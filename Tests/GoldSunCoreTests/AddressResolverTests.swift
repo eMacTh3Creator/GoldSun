@@ -79,9 +79,10 @@ final class AddressResolverTests: XCTestCase {
     }
 
     func testChromiumCompatibilityTargetTracksStableMacRelease() {
-        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodVersion, "150.0.7871.47")
-        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodRevision, "1639810")
-        XCTAssertEqual(ChromiumRuntimeVersion.majorVersion, "150")
+        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodVersion, "149.0.7827.201")
+        XCTAssertEqual(ChromiumRuntimeVersion.latestKnownGoodRevision, "1625079")
+        XCTAssertEqual(ChromiumRuntimeVersion.majorVersion, "149")
+        XCTAssertTrue(ChromiumRuntimeVersion.cefDistributionVersion.hasSuffix("chromium-\(ChromiumRuntimeVersion.latestKnownGoodVersion)"))
         XCTAssertEqual(WebBrowserCapability.passkeyEntitlement, "com.apple.developer.web-browser.public-key-credential")
     }
 

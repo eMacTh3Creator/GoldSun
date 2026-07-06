@@ -2,7 +2,30 @@
 
 GoldSun's intended backend is Chromium. On macOS, the practical embedding route for a Swift-native app is Chromium Embedded Framework (CEF), because raw Chromium is not designed as a small embeddable framework.
 
-Current compatibility target: Chrome Stable `150.0.7871.47` / Chromium revision `1639810`.
+Current compatibility target: Chrome Stable `149.0.7827.201` / Chromium revision `1625079`, delivered by pinned CEF `149.0.6+g0d0eeb6+chromium-149.0.7827.201`. (The previously documented `150.0.7871.47` was a beta-channel build number; CEF stable and Chrome Stable for Mac are both on 149 as of 2026-07-06.)
+
+## Implementation status (proof of life shipped in 0.2.13)
+
+Working today:
+
+- `script/fetch_cef.sh` downloads the pinned CEF distribution (SHA-256 verified) into the git-ignored `ThirdParty/CEFCache/`.
+- `GoldSunCEFBridge` (Objective-C++ SwiftPM target) owns the CEF lifecycle. It compiles the real integration only when the CEF cache is present (`__has_include`); otherwise it builds a stub and the app is WebKit-only, which keeps CI green without the 120 MB download.
+- The framework is loaded with `dlopen` and the C API is resolved with `dlsym` (no libcef link-time dependency, no `libcef_dll_wrapper` build). The API hash is verified against the compiled headers at startup.
+- `GSCEFBrowserHostView` hosts one windowed CEF browser per tab as a child `NSView`; `parent_view` forces Alloy runtime style, so no Chrome UI is transplanted.
+- `ChromiumBrowserView` (SwiftUI `NSViewRepresentable`) mirrors `WebKitBrowserView` against the same `BrowserTabSession` contract: navigation requests, back/forward/reload/stop, and title/URL/loading-state callbacks.
+- `EngineHostView` routes regular `http(s)` pages to Chromium when the runtime is bundled and healthy; internal pages, the start page, and the `engine.forceWebKit` defaults override stay on WebKit.
+- Message pump: CEF's external message pump (`on_schedule_message_pump_work`) drives `cef_do_message_loop_work` on the main run loop, with a 30 Hz safety-net timer in common run-loop modes.
+- `script/bundle_cef.sh` copies the framework and creates the five helper app bundles, signing nested-first (see `Packaging/README.md`).
+- Browsing profile persists at `~/Library/Application Support/GoldSun/CEFProfile`.
+
+Hard-won integration notes:
+
+- SwiftUI ignores `NSPrincipalClass`, so the `CefAppProtocol` methods (`isHandlingSendEvent` etc.) are grafted onto SwiftUI's `NSApplication` subclass at runtime with the Objective-C runtime, and `sendEvent:` is wrapped. Without this, CEF raises an unrecognized-selector exception during app termination.
+- The embedded Chromium runs with `--use-mock-keychain`. Ad-hoc signed builds otherwise trigger a macOS Keychain password prompt for "Chromium Safe Storage" on every rebuild, and the first navigation blocks until it is answered. Remove the switch once Developer ID signing is standard.
+- Browser creation waits for the host view to be in a window with non-empty bounds.
+- On termination, browsers are force-closed and the loop is pumped briefly before `cef_shutdown()` so the profile flushes cleanly.
+
+Not wired yet (next phases): downloads, popup routing into tabs, permission prompts, fullscreen handoff, renderer-crash recovery UI, password-manager integration, ad blocking on the Chromium path, and CEF in CI/release packaging.
 
 ## Recommended integration
 

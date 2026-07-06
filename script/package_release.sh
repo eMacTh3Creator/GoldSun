@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${1:-0.2.12}"
+VERSION="${1:-0.2.13}"
 APP_NAME="GoldSun"
 BUNDLE_ID="com.goldsun.browser"
 MIN_SYSTEM_VERSION="14.0"
@@ -38,7 +38,9 @@ rm -rf "$RELEASE_DIR" "$BUILD_DIR"
 mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$RELEASE_DIR"
 
 swift build -c release --product "$APP_NAME"
+swift build -c release --product GoldSunCEFHelper
 BUILD_BINARY="$(swift build -c release --show-bin-path)/$APP_NAME"
+CEF_HELPER_BINARY="$(swift build -c release --show-bin-path)/GoldSunCEFHelper"
 cp -X "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
 
@@ -131,6 +133,10 @@ cat >"$INFO_PLIST" <<PLIST
 </dict>
 </plist>
 PLIST
+
+# Bundle the Chromium runtime (no-op when the CEF cache is absent, e.g. CI).
+# Nested code must be signed before the main app below.
+"$ROOT_DIR/script/bundle_cef.sh" "$APP_BUNDLE" "$CEF_HELPER_BINARY"
 
 xattr -cr "$APP_BUNDLE" 2>/dev/null || true
 
