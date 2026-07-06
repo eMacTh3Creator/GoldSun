@@ -29,6 +29,13 @@ public enum SearchEngine: String, CaseIterable, Codable, Identifiable, Sendable 
             URLQueryItem(name: "q", value: query)
         ]
 
+        // URLComponents percent-encodes query values using `.urlQueryAllowed`,
+        // which treats "+" as an allowed, literal character. Search engines
+        // decode "+" in a query string as a space, so a literal "+" (e.g. in
+        // "c++ tutorial") would otherwise be silently turned into a space.
+        components.percentEncodedQuery = components.percentEncodedQuery?
+            .replacingOccurrences(of: "+", with: "%2B")
+
         return components.url!
     }
 }

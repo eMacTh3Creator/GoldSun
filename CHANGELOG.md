@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.16
+
+- Fixed searches with a literal `+` (for example `c++ tutorial`) being sent to DuckDuckGo/Google with the `+` silently turned into a space, since query strings decode `+` as a space; the search URL builder now percent-encodes a literal `+` as `%2B` so it survives.
+
 ## 0.2.15
 
 - Fixed the offline start page search box treating everything as a search: submissions now go through the same address resolution as the address bar, so typing `https://www.youtube.com` or `youtube.com` opens the site directly while plain text still searches.

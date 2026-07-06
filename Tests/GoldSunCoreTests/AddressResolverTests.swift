@@ -98,6 +98,15 @@ final class AddressResolverTests: XCTestCase {
         XCTAssertTrue(url.absoluteString.contains("swift%20browser%20architecture"))
     }
 
+    func testSearchEscapesLiteralPlusInQuery() {
+        let url = AddressResolver.resolvedURL(from: "c++ tutorial")
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+
+        XCTAssertEqual(components?.host, "duckduckgo.com")
+        XCTAssertEqual(components?.queryItems?.first { $0.name == "q" }?.value, "c++ tutorial")
+        XCTAssertTrue(url.absoluteString.contains("q=c%2B%2B%20tutorial"))
+    }
+
     func testAdBlockDefaultsEnableBalancedProtection() {
         let defaults = AdBlockConfiguration.defaults
 
