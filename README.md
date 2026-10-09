@@ -1,10 +1,10 @@
 # GoldSun
 
-GoldSun is a native macOS browser shell written in Swift. The product direction is a Chromium-backed browser with a Mac-first feel: system windows, menus, keyboard shortcuts, native controls, and a Safari-like calm around the browsing surface.
+GoldSun is a Mac browser written in Swift. It uses Chromium/CEF for web pages and Mac controls for tabs, menus, bookmarks, downloads, and settings.
 
-The version 2 direction is speed and security first: an offline GoldSun start page, HTTPS-first navigation, tracker-parameter cleanup, native content blocking, tighter pop-up defaults, and optional nonpersistent browsing storage.
+Features include a local start page, HTTPS-first browsing, removal of common tracking parameters, content blocking, pop-up settings, and optional private browsing storage.
 
-## Current scaffold
+## Features and components
 
 - SwiftPM macOS app target: `GoldSun`
 - Core library target: `GoldSunCore`
@@ -28,9 +28,9 @@ The version 2 direction is speed and security first: an offline GoldSun start pa
 - GitHub Pages-ready static site in `docs/`
 - URL/search normalization with tests
 - Codex Run action wired through `script/build_and_run.sh`
-- Chromium/CEF proof-of-life engine behind an Objective-C++ bridge (`GoldSunCEFBridge`), with a pinned CEF download script and automatic WebKit fallback
+- Chromium/CEF engine behind an Objective-C++ bridge (`GoldSunCEFBridge`), with a pinned CEF download script and automatic WebKit fallback
 
-GoldSun now hosts a real Chromium browsing surface through CEF when the pinned runtime is available. Release artifacts fetch and bundle CEF in CI, so regular `http(s)` pages render in Chromium; internal pages and the start page stay on the WebKit development shim, and the app falls back to WebKit entirely when the CEF runtime is not bundled. Chrome Web Store installation is still not exposed; extension support returns only after the Chromium runtime is production-ready.
+Release packages include Chromium/CEF for web pages. WebKit handles internal pages and the start page, and is used for all browsing when CEF is not bundled. Chrome Web Store installation is unavailable in the current package; see the release notes for extension support.
 
 ## Run
 
@@ -73,6 +73,6 @@ When the CEF cache is present, packaging bundles the Chromium framework and help
 
 The `.pkg` artifact opens as a versioned `Install GoldSun <version>` installer and installs GoldSun into `/Applications`. Current prerelease artifacts are unsigned; see `docs/Release.md` for Developer ID signing and notarization.
 
-## Chromium path
+## Browser engine
 
-See `docs/ChromiumBackend.md` for the backend plan. The short version: use Chromium Embedded Framework as the first practical backend, wrap it in a small Objective-C++ boundary, expose only a Swift browser-engine facade to the UI, and handle signing/sandboxing as a first-class macOS packaging concern.
+See `docs/ChromiumBackend.md` for the engine architecture. An Objective-C++ bridge connects Chromium Embedded Framework to the Swift interface. Packaging includes the framework and helper apps.
