@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="GoldSun is a stripped-down macOS browser focused on fast launches, native polish, and security-first browsing defaults.">
+    <meta name="description" content="GoldSun is a Mac browser with tabs, bookmarks, Keychain passwords, and HTTPS-first settings.">
     <title>GoldSun for macOS</title>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -25,7 +25,7 @@
       <section class="hero">
         <div class="hero-copy">
           <h1>GoldSun</h1>
-          <p>A stripped-down Mac browser built for speed, security, and a calmer native feel.</p>
+          <p>A Mac browser with tabs, bookmarks, downloads, and passwords saved in Keychain.</p>
           <div class="actions">
             <a class="button primary" href="https://github.com/eMacTh3Creator/GoldSun/releases/download/v0.2.20/GoldSun-0.2.20.pkg">Download</a>
             <a class="button secondary" href="https://github.com/eMacTh3Creator/GoldSun">View Source</a>
@@ -39,8 +39,8 @@
       </section>
 
       <section id="security" class="intro">
-        <h2>Security without browser bloat.</h2>
-        <p>GoldSun keeps the surface area small while tightening the defaults that matter most in daily browsing.</p>
+        <h2>Privacy and connection settings</h2>
+        <p>Choose HTTPS-first browsing, remove common tracking parameters from links, and manage saved passwords in macOS Keychain.</p>
       </section>
 
       <section class="feature-band">
@@ -54,7 +54,7 @@
         </div>
         <div class="feature">
           <h2>Native content blocking</h2>
-          <p>The WebKit development backend installs a compact rule list for common ads, trackers, and strict-mode noise.</p>
+          <p>The WebKit development backend installs a compact rule list for common ads, trackers, and additional content in strict mode.</p>
         </div>
         <div class="feature">
           <h2>Keychain passwords</h2>
@@ -64,19 +64,19 @@
 
       <section id="speed" class="split">
         <div class="feature">
-          <h2>Fast by design</h2>
-          <p>GoldSun opens to an offline start page, keeps the UI native, and avoids heavy dependencies in the shell. The result is a browser that feels immediate before the Chromium backend work even lands.</p>
+          <h2>Local start page</h2>
+          <p>GoldSun opens to a local start page and uses Mac controls for its toolbar, tabs, and settings.</p>
         </div>
         <div class="feature">
-          <h2>Polished where it counts</h2>
-          <p>Version 0.2.20 ships the pinned Chromium/CEF runtime in the public installer and uses a versioned GoldSun installer screen so users know exactly what they are installing.</p>
+          <h2>Installation</h2>
+          <p>The version 0.2.20 installer includes Chromium/CEF and places GoldSun in your Applications folder.</p>
         </div>
       </section>
 
       <section id="release" class="release">
         <div>
           <h2>Version 0.2.20</h2>
-          <p>The prerelease package opens as a versioned GoldSun installer and installs GoldSun into Applications with a Dock/Finder icon, the refreshed mountain start page, native bookmarks with browser import/export, built-in bookmark, history, download, and password pages, Keychain-backed password storage with save prompts, default-browser registration metadata, signed-build passkey readiness, top tab bar browsing, the pinned Chromium/CEF runtime with helper apps, YouTube-compatible fullscreen video, a default-browser handoff for sites that block embedded sign-in, a downloads popover, auto update checks that quit GoldSun before installation, and security-first defaults. WebKit remains the fallback for internal pages and builds without CEF. Chrome Web Store installation controls are hidden in this package; see the release notes for extension support. The package is unsigned, so macOS may display a first-launch security prompt.</p>
+          <p>This prerelease includes Chromium/CEF, bookmark import and export, browsing history, downloads, and Keychain password storage. You can watch fullscreen video and open sites in your default browser when they do not allow sign-in inside GoldSun. The app checks for updates and closes before installing them. WebKit handles internal pages and builds without CEF. See the release notes for extension support. The package is unsigned, so macOS may display a first-launch security prompt.</p>
         </div>
         <pre><code>./script/package_release.sh 0.2.20</code></pre>
       </section>
